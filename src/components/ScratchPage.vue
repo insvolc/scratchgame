@@ -21,14 +21,15 @@
           
           <!-- 好运十倍 - 数字匹配（符合现实玩法） -->
           <div v-if="currentLottery.myNumbers" class="game-area">
-            <div class="scratch-wrapper">
-              <ScratchCanvas 
-                v-if="!currentLottery.isScratched"
-                @revealed="onRevealed"
-              >
-                <div class="lucky-ten-layout">
-                  <div class="lucky-row">
-                    <div class="lucky-label">中奖号码</div>
+            <div class="lucky-ten-layout">
+              <div class="lucky-row winning-row">
+                <div class="lucky-label">中奖号码</div>
+                <div class="scratch-wrapper winning-scratch">
+                  <ScratchCanvas 
+                    v-if="!currentLottery.isScratched"
+                    :brush-size="25"
+                    @revealed="() => onAreaRevealed('winning')"
+                  >
                     <div class="winning-numbers-row">
                       <div 
                         v-for="(num, index) in currentLottery.winningNumbers" 
@@ -38,10 +39,27 @@
                         <span class="win-num-text">{{ num.value }}</span>
                       </div>
                     </div>
+                  </ScratchCanvas>
+                  <div v-else class="winning-numbers-row">
+                    <div 
+                      v-for="(num, index) in currentLottery.winningNumbers" 
+                      :key="'win-num-' + index"
+                      class="winning-num-cell"
+                    >
+                      <span class="win-num-text">{{ num.value }}</span>
+                    </div>
                   </div>
-                  
-                  <div class="lucky-row">
-                    <div class="lucky-label">我的号码</div>
+                </div>
+              </div>
+              
+              <div class="lucky-row">
+                <div class="lucky-label">我的号码</div>
+                <div class="scratch-wrapper">
+                  <ScratchCanvas 
+                    v-if="!currentLottery.isScratched"
+                    :brush-size="25"
+                    @revealed="() => onAreaRevealed('mynumbers')"
+                  >
                     <div class="my-numbers-grid">
                       <div 
                         v-for="(num, index) in currentLottery.myNumbers" 
@@ -53,26 +71,8 @@
                         <span class="num-prize">{{ num.prize }}💰</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </ScratchCanvas>
-              <div v-else class="lucky-ten-layout">
-                <div class="lucky-row">
-                  <div class="lucky-label">中奖号码</div>
-                  <div class="winning-numbers-row">
-                    <div 
-                      v-for="(num, index) in currentLottery.winningNumbers" 
-                      :key="'win-num-' + index"
-                      class="winning-num-cell"
-                    >
-                      <span class="win-num-text">{{ num.value }}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="lucky-row">
-                  <div class="lucky-label">我的号码</div>
-                  <div class="my-numbers-grid">
+                  </ScratchCanvas>
+                  <div v-else class="my-numbers-grid">
                     <div 
                       v-for="(num, index) in currentLottery.myNumbers" 
                       :key="'num-' + index"
@@ -107,7 +107,7 @@
                 <div class="scratch-wrapper">
                   <ScratchCanvas 
                     v-if="!currentLottery.isScratched"
-                    @revealed="onRevealed"
+                    @revealed="() => onAreaRevealed('symbol-' + areaIdx)"
                   >
                     <div class="symbols-grid">
                       <div 
@@ -145,7 +145,7 @@
               <div class="scratch-wrapper">
                 <ScratchCanvas 
                   v-if="!currentLottery.isScratched"
-                  @revealed="onRevealed"
+                  @revealed="() => onAreaRevealed('grid')"
                 >
                   <div class="nine-grid">
                     <div 
@@ -202,7 +202,7 @@
                 <div class="scratch-wrapper">
                   <ScratchCanvas 
                     v-if="!currentLottery.isScratched"
-                    @revealed="onRevealed"
+                    @revealed="() => onAreaRevealed('triple-' + areaIdx)"
                   >
                     <div class="triple-numbers">
                       <div 
@@ -243,7 +243,7 @@
               <div class="scratch-wrapper">
                 <ScratchCanvas 
                   v-if="!currentLottery.isScratched"
-                  @revealed="onRevealed"
+                  @revealed="() => onAreaRevealed('mixed-number')"
                 >
                   <div class="my-numbers-grid small">
                     <div 
@@ -274,7 +274,7 @@
               <div class="scratch-wrapper">
                 <ScratchCanvas 
                   v-if="!currentLottery.isScratched"
-                  @revealed="onRevealed"
+                  @revealed="() => onAreaRevealed('mixed-symbol')"
                 >
                   <div class="bonus-symbols">
                     <div 
@@ -305,7 +305,7 @@
               <div class="scratch-wrapper">
                 <ScratchCanvas 
                   v-if="!currentLottery.isScratched"
-                  @revealed="onRevealed"
+                  @revealed="() => onAreaRevealed('mixed-bonus')"
                 >
                   <div class="bonus-prizes">
                     <div 
@@ -390,6 +390,25 @@ const coins = computed(() => gameStore.coins)
 
 const showResultAnimation = ref(false)
 const selectedMyNumbers = ref<Set<number>>(new Set())
+const scratchCanvasRefs = ref<Map<string, InstanceType<typeof ScratchCanvas>>>(new Map())
+const revealedAreas = ref<Set<string>>(new Set())
+
+const totalScratchAreas = computed(() => {
+  const lottery = currentLottery.value
+  if (!lottery) return 0
+  
+  let count = 0
+  if (lottery.myNumbers) count += 2
+  if (lottery.symbolAreas) count += lottery.symbolAreas.length
+  if (lottery.grid) count += 1
+  if (lottery.numberAreas) count += lottery.numberAreas.length
+  if (lottery.numberArea) count += 1
+  if (lottery.symbolArea) count += 1
+  if (lottery.bonusPrizes) count += 1
+  
+  console.log('totalScratchAreas calculated:', count)
+  return count
+})
 
 const resultIcon = computed(() => {
   if (!currentLottery.value?.result) return '❓'
@@ -473,6 +492,28 @@ function getConfettiStyle(index: number) {
   }
 }
 
+function onAreaRevealed(areaId: string) {
+  if (currentLottery.value?.isScratched) return
+  
+  console.log('Area revealed:', areaId)
+  console.log('Triggering revealAll because area is revealed')
+  
+  const lotteryId = currentLottery.value?.id
+  if (lotteryId) {
+    setTimeout(() => {
+      console.log('Executing revealAll for lottery:', lotteryId)
+      gameStore.scratchLottery(lotteryId)
+      
+      if (currentLottery.value?.prize && currentLottery.value.prize > 0) {
+        showResultAnimation.value = true
+        setTimeout(() => {
+          showResultAnimation.value = false
+        }, 2000)
+      }
+    }, 300)
+  }
+}
+
 function onRevealed() {
   if (currentLottery.value) {
     gameStore.scratchLottery(currentLottery.value.id)
@@ -520,6 +561,7 @@ onMounted(() => {
 watch(() => currentLottery.value?.id, () => {
   showResultAnimation.value = false
   selectedMyNumbers.value.clear()
+  revealedAreas.value.clear()
 })
 </script>
 
@@ -673,8 +715,8 @@ watch(() => currentLottery.value?.id, () => {
   flex: 1;
   display: flex;
   justify-content: space-between;
-  gap: 6px;
-  padding: 10px;
+  gap: 4px;
+  padding: 6px;
   background: #f9f9f9;
   border-radius: 8px;
 }
@@ -682,20 +724,32 @@ watch(() => currentLottery.value?.id, () => {
 .winning-num-cell {
   flex: 1;
   min-width: 42px;
-  height: 48px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #fff;
   border: 2px solid #ddd;
   border-radius: 8px;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: bold;
   color: #333;
 }
 
 .win-num-text {
   font-weight: bold;
+}
+
+.winning-row {
+  align-items: flex-start;
+}
+
+.winning-scratch {
+  max-height: 60px;
+}
+
+.winning-scratch .winning-numbers-row {
+  min-height: 48px;
 }
 
 .my-numbers-grid {

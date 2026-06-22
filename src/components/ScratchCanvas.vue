@@ -142,7 +142,13 @@ function calculateScratchPercentage() {
   
   emit('scratch', scratchPercentage.value)
   
-  // 不再自动揭示，由玩家通过一键刮开控制
+  if (scratchPercentage.value >= 50 && !isScratched.value) {
+    isScratched.value = true
+    console.log('Canvas revealed, percentage:', scratchPercentage.value)
+    nextTick(() => {
+      emit('revealed')
+    })
+  }
 }
 
 function revealAll() {
