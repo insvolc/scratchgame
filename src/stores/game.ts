@@ -169,8 +169,8 @@ function generateSymbolMatchContent(): {
       for (let i = 0; i < 3; i++) {
         symbols.push({ symbol: '💎', isWinning: true, isRevealed: false })
       }
-      const干扰符号 = ['👑', '⭐', '💰', '🎁', '🍀'][Math.floor(Math.random() * 5)]
-      symbols.push({ symbol: 干扰符号, isWinning: false, isRevealed: false })
+      const distractionSymbol = ['👑', '⭐', '💰', '🎁', '🍀'][Math.floor(Math.random() * 5)]
+      symbols.push({ symbol: distractionSymbol, isWinning: false, isRevealed: false })
     } else {
       for (let i = 0; i < 4; i++) {
         symbols.push({ 
@@ -196,7 +196,7 @@ function generateGridLineContent(): {
   const lines = [0, 1, 2, 3, 4, 5, 6, 7]
   
   const winningLines: number[] = []
-  const gridSymbols: Array<{ symbol: string; isWinning: boolean; lineIndex: number }> = []
+  const gridSymbols: Array<{ symbol: string; isWinning: boolean; lineIndex: number; isRevealed: boolean }> = []
   
   const hasWinLine = Math.random() > 0.4
   
@@ -218,12 +218,13 @@ function generateGridLineContent(): {
       )
       
       if (isOnWinningLine) {
-        gridSymbols.push({ symbol: winSymbol, isWinning: true, lineIndex: lineIdx })
+        gridSymbols.push({ symbol: winSymbol, isWinning: true, lineIndex: lineIdx, isRevealed: false })
       } else {
         gridSymbols.push({ 
           symbol: symbols[Math.floor(Math.random() * symbols.length)], 
           isWinning: false, 
-          lineIndex: -1 
+          lineIndex: -1,
+          isRevealed: false 
         })
       }
     }
@@ -232,7 +233,8 @@ function generateGridLineContent(): {
       gridSymbols.push({ 
         symbol: symbols[Math.floor(Math.random() * symbols.length)], 
         isWinning: false, 
-        lineIndex: -1 
+        lineIndex: -1,
+        isRevealed: false 
       })
     }
   }
@@ -284,7 +286,7 @@ function generateMatch3Content(): {
 
 // 超级财富 - 复合玩法
 function generateMixedContent(): {
-  numberArea: { myNumbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>; winningNumber: string };
+  numberArea: { myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>; winningNumbers: Array<{ value: string; isRevealed: boolean }> };
   symbolArea: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> };
   bonusPrizes: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
 } {
@@ -296,8 +298,8 @@ function generateMixedContent(): {
     for (let i = 0; i < 3; i++) {
       symbolArea.symbols.push({ symbol: '💎', isWinning: true, isRevealed: false })
     }
-    const干扰符号 = ['👑', '⭐', '💰'][Math.floor(Math.random() * 3)]
-    symbolArea.symbols.push({ symbol: 干扰符号, isWinning: false, isRevealed: false })
+    const distractionSymbol = ['👑', '⭐', '💰'][Math.floor(Math.random() * 3)]
+    symbolArea.symbols.push({ symbol: distractionSymbol, isWinning: false, isRevealed: false })
   } else {
     for (let i = 0; i < 4; i++) {
       symbolArea.symbols.push({ 
@@ -333,7 +335,7 @@ function determinePrize(lotteryId: string): { result: LotteryResult; prize: numb
   return { result: 'none', prize: 0 }
 }
 
-function generateLotteryContent(lottery: Lottery, prize: number): Record<string, unknown> {
+function generateLotteryContent(lottery: Lottery): Record<string, unknown> {
   switch (lottery.playType) {
     case 'numberMatch':
       return generateNumberMatchContent()
@@ -420,7 +422,7 @@ export const useGameStore = defineStore('game', () => {
     
     coins.value -= lottery.price
     
-    const content = generateLotteryContent(lottery, 0)
+    const content = generateLotteryContent(lottery)
     const { result, prize } = calculatePrizeFromContent(lotteryId, content)
     
     backpack.value.push({

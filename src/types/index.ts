@@ -1,3 +1,5 @@
+export type LotteryResult = 'grand' | 'first' | 'second' | 'third' | 'fourth' | 'none'
+
 export interface Lottery {
   id: string
   name: string
@@ -5,26 +7,9 @@ export interface Lottery {
   maxPrize: number
   probability: string
   theme: string
-  type: LotteryType
-  playType: PlayType
+  type: string
+  playType: 'numberMatch' | 'symbolMatch' | 'lineMatch' | 'match3' | 'bonus'
   description: string
-}
-
-export type LotteryType = 'number' | 'symbol' | 'grid' | 'lucky' | 'mixed'
-
-export type PlayType = 'match3' | 'numberMatch' | 'symbolMatch' | 'lineMatch' | 'bonus'
-
-export interface CellData {
-  value: string
-  prize?: number
-  isWinning: boolean
-  isRevealed: boolean
-}
-
-export interface SymbolCell {
-  symbol: string
-  isWinning: boolean
-  isRevealed: boolean
 }
 
 export interface BackpackItem {
@@ -34,31 +19,20 @@ export interface BackpackItem {
   lotteryTheme: string
   purchaseTime: number
   isScratched: boolean
-  prize?: number
-  result?: LotteryResult
-  // 好运十倍 - 数字匹配（符合现实玩法：5个中奖号码，10个我的号码）
-  myNumbers?: CellData[]
-  winningNumber?: string
+  prize: number
+  result: LotteryResult
+  myNumbers?: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>
   winningNumbers?: Array<{ value: string; isRevealed: boolean }>
-  // 点石成金 - 找符号
-  symbolAreas?: Array<{ symbols: SymbolCell[]; prize: number }>
-  // 走进桃花源 - 九宫格连线
+  symbolAreas?: Array<{ symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>; prize: number }>
   grid?: Array<Array<{ symbol: string; isWinning: boolean; isRevealed: boolean; lineIndex: number }>>
   winningLines?: number[]
-  // 甜蜜蜜 - 三同号
-  numberAreas?: Array<{ numbers: CellData[]; prize: number }>
-  // 超级财富 - 复合玩法
-  numberArea?: { myNumbers: CellData[]; winningNumber: string }
-  symbolArea?: { symbols: SymbolCell[] }
+  numberAreas?: Array<{ numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>; prize: number }>
+  numberArea?: {
+    myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>
+    winningNumbers: Array<{ value: string; isRevealed: boolean }>
+  }
+  symbolArea?: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> }
   bonusPrizes?: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
-}
-
-export type LotteryResult = 'grand' | 'first' | 'second' | 'third' | 'fourth' | 'none'
-
-export interface PrizeConfig {
-  result: LotteryResult
-  prize: number
-  probability: number
 }
 
 export interface GameState {
