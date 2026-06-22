@@ -1,0 +1,635 @@
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import type { Lottery, BackpackItem, LotteryResult, GameState } from '@/types'
+
+const STORAGE_KEY = 'scratch_game_data'
+
+// 真实刮刮乐玩法设计
+const lotteries: Lottery[] = [
+  {
+    id: '1',
+    name: '好运十倍',
+    price: 10,
+    maxPrize: 100,
+    probability: '1:3.5',
+    theme: 'gold',
+    type: 'number',
+    playType: 'numberMatch',
+    description: '刮开"我的号码"区，对照"中奖号码"，出现相同号码即中该号码下方所示奖金'
+  },
+  {
+    id: '2',
+    name: '点石成金',
+    price: 20,
+    maxPrize: 500,
+    probability: '1:4.5',
+    theme: 'diamond',
+    type: 'symbol',
+    playType: 'symbolMatch',
+    description: '刮开覆盖层，若出现3个相同的"金块"图案，即中该游戏区内所示的奖金'
+  },
+  {
+    id: '3',
+    name: '走进桃花源',
+    price: 50,
+    maxPrize: 1000,
+    probability: '1:5',
+    theme: 'red',
+    type: 'grid',
+    playType: 'lineMatch',
+    description: '在任一游戏区内，刮出3个相同的图案即中该游戏区的奖金；任意一条连线上的图案完全相同，即中该条连线所示的奖金'
+  },
+  {
+    id: '4',
+    name: '甜蜜蜜',
+    price: 5,
+    maxPrize: 50,
+    probability: '1:4',
+    theme: 'green',
+    type: 'lucky',
+    playType: 'match3',
+    description: '刮开覆盖层，如果任何一个"游戏区"内出现3个相同的图符，即中该游戏区的奖金'
+  },
+  {
+    id: '5',
+    name: '超级财富',
+    price: 100,
+    maxPrize: 10000,
+    probability: '1:3',
+    theme: 'rainbow',
+    type: 'mixed',
+    playType: 'bonus',
+    description: '三大玩法，一票三次中奖机会！数字匹配+找幸运符+奖金即开，三重惊喜等你来'
+  }
+]
+
+const prizeConfigs: Record<string, { result: LotteryResult; prize: number; probability: number }[]> = {
+  '1': [
+    { result: 'grand', prize: 100, probability: 0.01 },
+    { result: 'first', prize: 50, probability: 0.03 },
+    { result: 'second', prize: 20, probability: 0.08 },
+    { result: 'third', prize: 10, probability: 0.18 },
+    { result: 'none', prize: 0, probability: 0.70 }
+  ],
+  '2': [
+    { result: 'grand', prize: 500, probability: 0.005 },
+    { result: 'first', prize: 200, probability: 0.02 },
+    { result: 'second', prize: 50, probability: 0.06 },
+    { result: 'third', prize: 20, probability: 0.12 },
+    { result: 'none', prize: 0, probability: 0.795 }
+  ],
+  '3': [
+    { result: 'grand', prize: 1000, probability: 0.002 },
+    { result: 'first', prize: 500, probability: 0.015 },
+    { result: 'second', prize: 100, probability: 0.05 },
+    { result: 'third', prize: 50, probability: 0.10 },
+    { result: 'none', prize: 0, probability: 0.823 }
+  ],
+  '4': [
+    { result: 'first', prize: 50, probability: 0.03 },
+    { result: 'second', prize: 20, probability: 0.07 },
+    { result: 'third', prize: 10, probability: 0.15 },
+    { result: 'fourth', prize: 5, probability: 0.25 },
+    { result: 'none', prize: 0, probability: 0.50 }
+  ],
+  '5': [
+    { result: 'grand', prize: 10000, probability: 0.0005 },
+    { result: 'first', prize: 1000, probability: 0.008 },
+    { result: 'second', prize: 500, probability: 0.03 },
+    { result: 'third', prize: 100, probability: 0.08 },
+    { result: 'fourth', prize: 50, probability: 0.12 },
+    { result: 'none', prize: 0, probability: 0.7615 }
+  ]
+}
+
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2)
+}
+
+// 好运十倍 - 数字匹配型（符合现实玩法）
+// 规则：中奖号码区（5个号码）和我的号码区（10个号码，每个带奖金）都被覆盖
+// 刮开后，若我的号码与任一中奖号码相同，即获得该号码下方的奖金
+function generateNumberMatchContent(): { 
+  myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>;
+  winningNumbers: Array<{ value: string; isRevealed: boolean }>
+} {
+  const allNumbers: string[] = []
+  for (let i = 1; i <= 36; i++) {
+    allNumbers.push(i.toString().padStart(2, '0'))
+  }
+  
+  const availableForWinning = [...allNumbers]
+  const winningValues: string[] = []
+  
+  for (let i = 0; i < 5; i++) {
+    const idx = Math.floor(Math.random() * availableForWinning.length)
+    winningValues.push(availableForWinning.splice(idx, 1)[0])
+  }
+  
+  const basePrizes = [5, 10, 20, 50, 100, 200, 500, 1000, 20, 50]
+  const myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }> = []
+  const availableForMyNumbers = [...allNumbers]
+  
+  for (let i = 0; i < 10; i++) {
+    const idx = Math.floor(Math.random() * availableForMyNumbers.length)
+    const value = availableForMyNumbers.splice(idx, 1)[0]
+    const isWinning = winningValues.includes(value)
+    
+    myNumbers.push({
+      value,
+      prize: basePrizes[i % basePrizes.length] * 10,
+      isWinning,
+      isRevealed: false
+    })
+  }
+  
+  return {
+    myNumbers: myNumbers.sort(() => Math.random() - 0.5),
+    winningNumbers: winningValues
+      .sort((a, b) => parseInt(a) - parseInt(b))
+      .map(value => ({ value, isRevealed: false }))
+  }
+}
+
+// 点石成金 - 找符号型
+function generateSymbolMatchContent(): { 
+  areas: Array<{ 
+    symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>;
+    prize: number
+  }>
+} {
+  const areas = []
+  const areaPrizes = [200, 50, 20]
+  
+  for (let a = 0; a < 3; a++) {
+    const symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> = []
+    const isWinning = Math.random() > 0.6
+    
+    if (isWinning) {
+      for (let i = 0; i < 3; i++) {
+        symbols.push({ symbol: '💎', isWinning: true, isRevealed: false })
+      }
+      const干扰符号 = ['👑', '⭐', '💰', '🎁', '🍀'][Math.floor(Math.random() * 5)]
+      symbols.push({ symbol: 干扰符号, isWinning: false, isRevealed: false })
+    } else {
+      for (let i = 0; i < 4; i++) {
+        symbols.push({ 
+          symbol: ['👑', '⭐', '💰', '🎁', '🍀', '🏆', '🎯'][Math.floor(Math.random() * 7)], 
+          isWinning: false, 
+          isRevealed: false 
+        })
+      }
+    }
+    
+    areas.push({ symbols: symbols.sort(() => Math.random() - 0.5), prize: areaPrizes[a] })
+  }
+  
+  return { areas }
+}
+
+// 走进桃花源 - 九宫格连线型
+function generateGridLineContent(): {
+  grid: Array<Array<{ symbol: string; isWinning: boolean; isRevealed: boolean; lineIndex: number }>>;
+  winningLines: number[]
+} {
+  const symbols = ['🌸', '🍑', '🌺', '🌻', '🌷']
+  const lines = [0, 1, 2, 3, 4, 5, 6, 7]
+  
+  const winningLines: number[] = []
+  const gridSymbols: Array<{ symbol: string; isWinning: boolean; lineIndex: number }> = []
+  
+  const hasWinLine = Math.random() > 0.4
+  
+  if (hasWinLine) {
+    const lineIdx = Math.floor(Math.random() * lines.length)
+    winningLines.push(lineIdx)
+    const winSymbol = symbols[Math.floor(Math.random() * symbols.length)]
+    
+    for (let i = 0; i < 9; i++) {
+      const isOnWinningLine = (
+        (lineIdx === 0 && i >= 0 && i <= 2) ||
+        (lineIdx === 1 && i >= 3 && i <= 5) ||
+        (lineIdx === 2 && i >= 6 && i <= 8) ||
+        (lineIdx === 3 && i % 3 === 0) ||
+        (lineIdx === 4 && i % 3 === 1) ||
+        (lineIdx === 5 && i % 3 === 2) ||
+        (lineIdx === 6 && i % 4 === 0) ||
+        (lineIdx === 7 && (i === 2 || i === 4 || i === 6))
+      )
+      
+      if (isOnWinningLine) {
+        gridSymbols.push({ symbol: winSymbol, isWinning: true, lineIndex: lineIdx })
+      } else {
+        gridSymbols.push({ 
+          symbol: symbols[Math.floor(Math.random() * symbols.length)], 
+          isWinning: false, 
+          lineIndex: -1 
+        })
+      }
+    }
+  } else {
+    for (let i = 0; i < 9; i++) {
+      gridSymbols.push({ 
+        symbol: symbols[Math.floor(Math.random() * symbols.length)], 
+        isWinning: false, 
+        lineIndex: -1 
+      })
+    }
+  }
+  
+  const grid: typeof gridSymbols[] = []
+  for (let r = 0; r < 3; r++) {
+    grid.push(gridSymbols.slice(r * 3, r * 3 + 3))
+  }
+  
+  return { grid, winningLines }
+}
+
+// 甜蜜蜜 - 三同号型
+function generateMatch3Content(): {
+  areas: Array<{
+    numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>;
+    prize: number
+  }>
+} {
+  const areas = []
+  const areaPrizes = [50, 20, 10]
+  
+  for (let a = 0; a < 3; a++) {
+    const numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }> = []
+    const isWinning = Math.random() > 0.5
+    const winningNum = Math.floor(Math.random() * 9) + 1
+    
+    if (isWinning) {
+      for (let i = 0; i < 3; i++) {
+        numbers.push({ value: winningNum.toString(), isWinning: true, isRevealed: false })
+      }
+    } else {
+      const usedNums = new Set<number>()
+      for (let i = 0; i < 3; i++) {
+        let num: number
+        do {
+          num = Math.floor(Math.random() * 9) + 1
+        } while (usedNums.has(num))
+        usedNums.add(num)
+        numbers.push({ value: num.toString(), isWinning: false, isRevealed: false })
+      }
+    }
+    
+    areas.push({ numbers: numbers.sort(() => Math.random() - 0.5), prize: areaPrizes[a] })
+  }
+  
+  return { areas }
+}
+
+// 超级财富 - 复合玩法
+function generateMixedContent(): {
+  numberArea: { myNumbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>; winningNumber: string };
+  symbolArea: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> };
+  bonusPrizes: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
+} {
+  const numberArea = generateNumberMatchContent()
+  
+  const symbolArea = { symbols: [] as Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> }
+  const isWinning = Math.random() > 0.5
+  if (isWinning) {
+    for (let i = 0; i < 3; i++) {
+      symbolArea.symbols.push({ symbol: '💎', isWinning: true, isRevealed: false })
+    }
+    const干扰符号 = ['👑', '⭐', '💰'][Math.floor(Math.random() * 3)]
+    symbolArea.symbols.push({ symbol: 干扰符号, isWinning: false, isRevealed: false })
+  } else {
+    for (let i = 0; i < 4; i++) {
+      symbolArea.symbols.push({ 
+        symbol: ['👑', '⭐', '💰', '🎁'][Math.floor(Math.random() * 4)], 
+        isWinning: false, 
+        isRevealed: false 
+      })
+    }
+  }
+  symbolArea.symbols = symbolArea.symbols.sort(() => Math.random() - 0.5)
+  
+  const bonusPrizes = [10, 20, 50, 100, 200, 500].map(v => ({
+    value: v,
+    isWinning: v === 500 && Math.random() > 0.7,
+    isRevealed: false
+  }))
+  
+  return { numberArea, symbolArea, bonusPrizes }
+}
+
+function determinePrize(lotteryId: string): { result: LotteryResult; prize: number } {
+  const config = prizeConfigs[lotteryId] || prizeConfigs['1']
+  const random = Math.random()
+  let cumulative = 0
+  
+  for (const item of config) {
+    cumulative += item.probability
+    if (random <= cumulative) {
+      return { result: item.result, prize: item.prize }
+    }
+  }
+  
+  return { result: 'none', prize: 0 }
+}
+
+function generateLotteryContent(lottery: Lottery, prize: number): Record<string, unknown> {
+  switch (lottery.playType) {
+    case 'numberMatch':
+      return generateNumberMatchContent()
+    case 'symbolMatch':
+      return generateSymbolMatchContent()
+    case 'lineMatch':
+      return generateGridLineContent()
+    case 'match3':
+      return generateMatch3Content()
+    case 'bonus':
+      return generateMixedContent()
+    default:
+      return generateNumberMatchContent()
+  }
+}
+
+function loadFromStorage(): Partial<GameState> {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY)
+    if (data) {
+      return JSON.parse(data)
+    }
+  } catch {
+    console.error('Failed to load game data')
+  }
+  return {}
+}
+
+function saveToStorage(state: GameState): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    console.error('Failed to save game data')
+  }
+}
+
+export const useGameStore = defineStore('game', () => {
+  const saved = loadFromStorage()
+  
+  const coins = ref(saved.coins ?? 100)
+  const backpack = ref<BackpackItem[]>(saved.backpack ?? [])
+  const currentView = ref<'home' | 'shop' | 'backpack' | 'scratch'>(saved.currentView ?? 'home')
+  const currentLottery = ref<BackpackItem | null>(null)
+  
+  const unscratchedCount = computed(() => 
+    backpack.value.filter(item => !item.isScratched).length
+  )
+  
+  const totalWon = computed(() => 
+    backpack.value.filter(item => item.isScratched && item.prize).reduce((sum, item) => sum + (item.prize || 0), 0)
+  )
+  
+  function setView(view: 'home' | 'shop' | 'backpack' | 'scratch') {
+    currentView.value = view
+    saveState()
+  }
+  
+  function calculatePrizeFromContent(lotteryId: string, content: Record<string, unknown>): { result: LotteryResult; prize: number } {
+    if (lotteryId === '1' && content.myNumbers) {
+      const myNumbers = content.myNumbers as Array<{ value: string; prize: number; isWinning: boolean }>
+      const winningNumbers = (content.winningNumbers as Array<{ value: string }> | undefined)?.map(n => n.value) || []
+      const totalPrize = myNumbers
+        .filter(n => winningNumbers.includes(n.value))
+        .reduce((sum, n) => sum + (n.prize || 0), 0)
+      
+      let result: LotteryResult = 'none'
+      if (totalPrize >= 1000) result = 'grand'
+      else if (totalPrize >= 500) result = 'first'
+      else if (totalPrize >= 100) result = 'second'
+      else if (totalPrize >= 50) result = 'third'
+      else if (totalPrize > 0) result = 'fourth'
+      
+      return { result, prize: totalPrize }
+    }
+    
+    return determinePrize(lotteryId)
+  }
+  
+  function buyLottery(lotteryId: string) {
+    const lottery = lotteries.find(l => l.id === lotteryId)
+    if (!lottery) return false
+    
+    if (coins.value < lottery.price) return false
+    
+    coins.value -= lottery.price
+    
+    const content = generateLotteryContent(lottery, 0)
+    const { result, prize } = calculatePrizeFromContent(lotteryId, content)
+    
+    backpack.value.push({
+      id: generateId(),
+      lotteryId,
+      lotteryName: lottery.name,
+      lotteryTheme: lottery.theme,
+      purchaseTime: Date.now(),
+      isScratched: false,
+      prize,
+      result,
+      ...content
+    } as BackpackItem)
+    
+    saveState()
+    return true
+  }
+  
+  function selectLottery(item: BackpackItem) {
+    currentLottery.value = item
+    currentView.value = 'scratch'
+    saveState()
+  }
+  
+  function revealCell(itemId: string, areaIndex: number, cellIndex: number, type: string) {
+    const item = backpack.value.find(i => i.id === itemId)
+    if (!item || item.isScratched) return
+    
+    switch (type) {
+      case 'numberMatch':
+        if (item.myNumbers) {
+          item.myNumbers[cellIndex] = { ...item.myNumbers[cellIndex], isRevealed: true }
+        }
+        break
+      case 'symbolMatch':
+        if (item.symbolAreas) {
+          item.symbolAreas[areaIndex]?.symbols[cellIndex] && 
+          (item.symbolAreas[areaIndex].symbols[cellIndex].isRevealed = true)
+        }
+        break
+      case 'match3':
+        if (item.numberAreas) {
+          item.numberAreas[areaIndex]?.numbers[cellIndex] && 
+          (item.numberAreas[areaIndex].numbers[cellIndex].isRevealed = true)
+        }
+        break
+      case 'bonus':
+        if (item.bonusPrizes) {
+          item.bonusPrizes[cellIndex] && (item.bonusPrizes[cellIndex].isRevealed = true)
+        }
+        break
+    }
+    
+    checkAutoReveal(item)
+    saveState()
+  }
+  
+  function scratchLottery(itemId: string) {
+    const item = backpack.value.find(i => i.id === itemId)
+    if (!item || item.isScratched) return
+    
+    item.isScratched = true
+    
+    if (item.myNumbers) {
+      item.myNumbers = item.myNumbers.map(n => ({ ...n, isRevealed: true }))
+    }
+    
+    if (item.winningNumbers) {
+      item.winningNumbers = item.winningNumbers.map(n => ({ ...n, isRevealed: true }))
+    }
+    
+    if (item.symbolAreas) {
+      item.symbolAreas = item.symbolAreas.map(area => ({
+        ...area,
+        symbols: area.symbols.map(s => ({ ...s, isRevealed: true }))
+      }))
+    }
+    
+    if (item.grid) {
+      item.grid = item.grid.map(row => 
+        row.map(cell => ({ ...cell, isRevealed: true }))
+      )
+    }
+    
+    if (item.numberAreas) {
+      item.numberAreas = item.numberAreas.map(area => ({
+        ...area,
+        numbers: area.numbers.map(n => ({ ...n, isRevealed: true }))
+      }))
+    }
+    
+    if (item.numberArea?.myNumbers) {
+      item.numberArea.myNumbers = item.numberArea.myNumbers.map(n => ({ ...n, isRevealed: true }))
+    }
+    if (item.symbolArea?.symbols) {
+      item.symbolArea.symbols = item.symbolArea.symbols.map(s => ({ ...s, isRevealed: true }))
+    }
+    if (item.bonusPrizes) {
+      item.bonusPrizes = item.bonusPrizes.map(b => ({ ...b, isRevealed: true }))
+    }
+    
+    if (item.prize && item.prize > 0) {
+      coins.value += item.prize
+    }
+    
+    saveState()
+  }
+  
+  function checkAutoReveal(item: BackpackItem) {
+    if (!item.isScratched) {
+      let totalCells = 0
+      let revealedCells = 0
+      
+      if (item.myNumbers) {
+        totalCells += item.myNumbers.length
+        revealedCells += item.myNumbers.filter(n => n.isRevealed).length
+      }
+      
+      if (item.symbolAreas) {
+        item.symbolAreas.forEach(area => {
+          totalCells += area.symbols.length
+          revealedCells += area.symbols.filter(s => s.isRevealed).length
+        })
+      }
+      
+      if (item.grid) {
+        item.grid.forEach(row => {
+          row.forEach(cell => {
+            totalCells++
+            if (cell.isRevealed) revealedCells++
+          })
+        })
+      }
+      
+      if (item.numberAreas) {
+        item.numberAreas.forEach(area => {
+          totalCells += area.numbers.length
+          revealedCells += area.numbers.filter(n => n.isRevealed).length
+        })
+      }
+      
+      if (item.numberArea?.myNumbers) {
+        totalCells += item.numberArea.myNumbers.length
+        revealedCells += item.numberArea.myNumbers.filter(n => n.isRevealed).length
+      }
+      if (item.symbolArea?.symbols) {
+        totalCells += item.symbolArea.symbols.length
+        revealedCells += item.symbolArea.symbols.filter(s => s.isRevealed).length
+      }
+      if (item.bonusPrizes) {
+        totalCells += item.bonusPrizes.length
+        revealedCells += item.bonusPrizes.filter(b => b.isRevealed).length
+      }
+      
+      if (totalCells > 0 && revealedCells / totalCells >= 0.6) {
+        scratchLottery(item.id)
+      }
+    }
+  }
+  
+  function removeLottery(itemId: string) {
+    const index = backpack.value.findIndex(i => i.id === itemId)
+    if (index > -1) {
+      backpack.value.splice(index, 1)
+      saveState()
+    }
+  }
+  
+  function clearScratched() {
+    backpack.value = backpack.value.filter(item => !item.isScratched)
+    saveState()
+  }
+  
+  function refreshCoins() {
+    coins.value = 100
+    backpack.value = []
+    saveState()
+  }
+  
+  function addCoins(amount: number) {
+    coins.value += amount
+    saveState()
+  }
+  
+  function saveState() {
+    saveToStorage({
+      coins: coins.value,
+      backpack: backpack.value,
+      currentView: currentView.value,
+      currentLottery: currentLottery.value
+    })
+  }
+  
+  return {
+    coins,
+    lotteries,
+    backpack,
+    currentView,
+    currentLottery,
+    unscratchedCount,
+    totalWon,
+    setView,
+    buyLottery,
+    selectLottery,
+    scratchLottery,
+    revealCell,
+    removeLottery,
+    clearScratched,
+    refreshCoins,
+    addCoins
+  }
+})
