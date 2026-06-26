@@ -524,10 +524,6 @@ export const useGameStore = defineStore('game', () => {
       item.bonusPrizes = item.bonusPrizes.map(b => ({ ...b, isRevealed: true }))
     }
     
-    if (item.prize && item.prize > 0) {
-      coins.value += item.prize
-    }
-    
     saveState()
   }
   

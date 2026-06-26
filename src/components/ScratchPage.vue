@@ -88,7 +88,7 @@
               </div>
             </div>
             
-            <div class="match-result" v-if="currentLottery.isScratched">
+            <div class="match-result" v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)">
               <span class="match-count">匹配 {{ getMatchCount(currentLottery) }} 个号码</span>
               <span class="total-prize">共获得 {{ getTotalPrize(currentLottery) }} 金币</span>
             </div>
@@ -333,7 +333,7 @@
           </div>
           
           <!-- 结果展示 -->
-          <div v-if="currentLottery.isScratched" class="result-section">
+          <div v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)" class="result-section">
             <div class="result-icon">
               {{ resultIcon }}
             </div>
@@ -392,6 +392,7 @@ const showResultAnimation = ref(false)
 const selectedMyNumbers = ref<Set<number>>(new Set())
 const scratchCanvasRefs = ref<Map<string, InstanceType<typeof ScratchCanvas>>>(new Map())
 const revealedAreas = ref<Set<string>>(new Set())
+const hasClickedWinningNumber = ref(false)
 
 const totalScratchAreas = computed(() => {
   const lottery = currentLottery.value
@@ -440,6 +441,11 @@ const hasNextLottery = computed(() => {
   return (backpack.value || []).some(item => !item.isScratched && item.id !== currentLottery.value?.id)
 })
 
+const hasWinningNumbers = computed(() => {
+  if (!currentLottery.value?.myNumbers) return false
+  return currentLottery.value.myNumbers.some(n => n.isWinning)
+})
+
 function getLotteryPrice(lotteryId: string): number {
   const prices: Record<string, number> = {
     '1': 10,
@@ -467,12 +473,21 @@ function handleNumberClick(index: number) {
   if (!num || !num.isWinning) return
   
   const next = new Set(selectedMyNumbers.value)
-  if (next.has(index)) {
-    next.delete(index)
-  } else {
+  if (!next.has(index)) {
     next.add(index)
+    selectedMyNumbers.value = next
+    
+    // 点击中奖号码时进行金币结算
+    if (num.prize && num.prize > 0) {
+      gameStore.addCoins(num.prize)
+      showResultAnimation.value = true
+      setTimeout(() => {
+        showResultAnimation.value = false
+      }, 2000)
+    }
   }
-  selectedMyNumbers.value = next
+  
+  hasClickedWinningNumber.value = true
 }
 
 function getConfettiStyle(index: number) {
@@ -495,21 +510,10 @@ function getConfettiStyle(index: number) {
 function onAreaRevealed(areaId: string) {
   if (currentLottery.value?.isScratched) return
   
-  console.log('Area revealed:', areaId)
-  console.log('Triggering revealAll because area is revealed')
-  
   const lotteryId = currentLottery.value?.id
   if (lotteryId) {
     setTimeout(() => {
-      console.log('Executing revealAll for lottery:', lotteryId)
       gameStore.scratchLottery(lotteryId)
-      
-      if (currentLottery.value?.prize && currentLottery.value.prize > 0) {
-        showResultAnimation.value = true
-        setTimeout(() => {
-          showResultAnimation.value = false
-        }, 2000)
-      }
     }, 300)
   }
 }
@@ -517,26 +521,12 @@ function onAreaRevealed(areaId: string) {
 function onRevealed() {
   if (currentLottery.value) {
     gameStore.scratchLottery(currentLottery.value.id)
-    
-    if (currentLottery.value.prize && currentLottery.value.prize > 0) {
-      showResultAnimation.value = true
-      setTimeout(() => {
-        showResultAnimation.value = false
-      }, 2000)
-    }
   }
 }
 
 function revealAll() {
   if (currentLottery.value) {
     gameStore.scratchLottery(currentLottery.value.id)
-    
-    if (currentLottery.value.prize && currentLottery.value.prize > 0) {
-      showResultAnimation.value = true
-      setTimeout(() => {
-        showResultAnimation.value = false
-      }, 2000)
-    }
   }
 }
 
@@ -556,12 +546,14 @@ function goToNext() {
 
 onMounted(() => {
   showResultAnimation.value = false
+  hasClickedWinningNumber.value = false
 })
 
 watch(() => currentLottery.value?.id, () => {
   showResultAnimation.value = false
   selectedMyNumbers.value.clear()
   revealedAreas.value.clear()
+  hasClickedWinningNumber.value = false
 })
 </script>
 
