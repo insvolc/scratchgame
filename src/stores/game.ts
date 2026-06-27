@@ -9,7 +9,7 @@ const lotteries: Lottery[] = [
   {
     id: '1',
     name: '好运十倍',
-    price: 10,
+    price: 50,
     maxPrize: 100,
     probability: '1:3.5',
     theme: 'gold',
