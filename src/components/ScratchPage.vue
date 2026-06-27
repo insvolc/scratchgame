@@ -679,57 +679,63 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 /* 好运十倍（符合现实玩法） */
 .lucky-ten-layout {
   background: linear-gradient(135deg, #fff9e6, #ffefd5);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 16px;
+  padding: 16px;
   border: 2px dashed #ffd700;
   min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .lucky-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.lucky-row:last-child {
-  margin-bottom: 0;
+  align-items: stretch;
+  gap: 12px;
 }
 
 .lucky-label {
   flex-shrink: 0;
-  width: 28px;
-  font-size: 13px;
+  width: 32px;
+  font-size: 15px;
   font-weight: bold;
   color: #8B4513;
   text-align: center;
   writing-mode: vertical-rl;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 215, 0, 0.15);
+  border-radius: 8px;
+  padding: 8px 0;
 }
 
 .winning-numbers-row {
   flex: 1;
   display: flex;
   justify-content: space-between;
-  gap: 4px;
-  padding: 6px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  gap: 10px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .winning-num-cell {
   flex: 1;
-  min-width: 42px;
-  min-height: 48px;
+  min-width: 48px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 18px;
+  background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 22px;
   font-weight: bold;
   color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .win-num-text {
@@ -737,25 +743,26 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .winning-row {
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .winning-scratch {
-  max-height: 60px;
+  max-height: 76px;
 }
 
 .winning-scratch .winning-numbers-row {
-  min-height: 48px;
+  min-height: 56px;
 }
 
 .my-numbers-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(36px, 1fr));
-  gap: 4px;
-  padding: 8px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  grid-template-columns: repeat(5, minmax(44px, 1fr));
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .my-numbers-grid.small {
@@ -764,21 +771,21 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .number-cell-with-prize {
-  min-width: 36px;
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 72px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-size: 12px;
+  background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
   font-weight: bold;
   color: #333;
-  padding: 3px;
+  padding: 4px 2px;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  overflow: hidden;
 }
 
 .number-cell-with-prize:active {
@@ -787,20 +794,35 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 
 .number-cell-with-prize.winning {
   background: linear-gradient(135deg, #ffd700, #ffb700);
-  border-color: #ffd700;
+  border-color: #ff9800;
   color: #8B4513;
   animation: pulse 1s infinite;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 16px rgba(255, 152, 0, 0.5);
 }
 
 .num-value {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
+  line-height: 1.2;
 }
 
 .num-prize {
-  font-size: 9px;
-  margin-top: 1px;
+  font-size: 10px;
+  margin-top: 4px;
+  color: #ff6b6b;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1px;
+  line-height: 1.2;
+  text-align: center;
+  max-width: 100%;
+}
+
+.number-cell-with-prize.winning .num-prize {
+  color: #8B4513;
 }
 
 .match-result {
