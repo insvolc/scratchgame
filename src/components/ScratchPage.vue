@@ -481,12 +481,25 @@ function getConfettiStyle(index: number) {
 function onAreaRevealed(areaId: string) {
   if (currentLottery.value?.isScratched) return
   
-  const lotteryId = currentLottery.value?.id
-  if (lotteryId) {
-    setTimeout(() => {
-      gameStore.scratchLottery(lotteryId)
-    }, 300)
+  revealedAreas.value.add(areaId)
+  
+  const lottery = currentLottery.value
+  if (!lottery) return
+  
+  // 好运十倍需要两个区域都刮开后才完全刮开
+  if (lottery.myNumbers) {
+    if (revealedAreas.value.has('winning') && revealedAreas.value.has('mynumbers')) {
+      setTimeout(() => {
+        gameStore.scratchLottery(lottery.id)
+      }, 300)
+    }
+    return
   }
+  
+  // 其他玩法单个区域刮开即可
+  setTimeout(() => {
+    gameStore.scratchLottery(lottery.id)
+  }, 300)
 }
 
 function onRevealed() {
@@ -715,7 +728,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   flex: 1;
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 6px;
   padding: 10px;
   background: #fff;
   border-radius: 12px;
@@ -724,15 +737,15 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 
 .winning-num-cell {
   flex: 1;
-  min-width: 48px;
-  min-height: 56px;
+  min-width: 44px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
   border: 2px solid #e0e0e0;
   border-radius: 10px;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: bold;
   color: #333;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -747,11 +760,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .winning-scratch {
-  max-height: 76px;
+  max-height: 92px;
 }
 
 .winning-scratch .winning-numbers-row {
-  min-height: 56px;
+  min-height: 72px;
 }
 
 .my-numbers-grid {

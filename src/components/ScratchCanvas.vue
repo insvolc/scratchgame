@@ -11,10 +11,10 @@
       @touchmove="handleTouchMove"
       @touchend="stopScratch"
     ></canvas>
-    <div class="scratch-content" :style="contentStyle">
+    <div class="scratch-content">
       <slot></slot>
     </div>
-    <div class="scratch-hint" v-if="!isScratched && scratchPercentage < 50">
+    <div class="scratch-hint" v-if="!isScratched && scratchPercentage < revealThreshold">
       <span>👆 滑动刮开涂层</span>
     </div>
   </div>
@@ -40,24 +40,7 @@ const scratchCanvas = ref<HTMLCanvasElement | null>(null)
 const isScratching = ref(false)
 const scratchPercentage = ref(0)
 const isScratched = ref(false)
-const contentWidth = ref(props.width || 300)
-const contentHeight = ref(props.height || 200)
-
-const contentStyle = computed(() => ({
-  width: `${contentWidth.value}px`,
-  height: `${contentHeight.value}px`
-}))
-
-function measureContentSize() {
-  const container = containerRef.value
-  if (!container) return
-  const content = container.querySelector('.scratch-content')
-  if (content) {
-    const rect = content.getBoundingClientRect()
-    contentWidth.value = Math.max(rect.width, props.width || 300)
-    contentHeight.value = Math.max(rect.height, props.height || 200)
-  }
-}
+const revealThreshold = computed(() => props.revealThreshold ?? 80)
 
 function getPosition(e: MouseEvent | Touch) {
   const canvas = scratchCanvas.value
@@ -142,7 +125,7 @@ function calculateScratchPercentage() {
   
   emit('scratch', scratchPercentage.value)
   
-  if (scratchPercentage.value >= 50 && !isScratched.value) {
+  if (scratchPercentage.value >= revealThreshold.value && !isScratched.value) {
     isScratched.value = true
     console.log('Canvas revealed, percentage:', scratchPercentage.value)
     nextTick(() => {
@@ -163,31 +146,34 @@ function revealAll() {
 }
 
 function initCanvas() {
-  measureContentSize()
   nextTick(() => {
-    const canvas = scratchCanvas.value
-    const container = containerRef.value
-    if (!canvas || !container) return
-    
-    const rect = container.getBoundingClientRect()
-    canvas.width = rect.width * window.devicePixelRatio
-    canvas.height = rect.height * window.devicePixelRatio
-    canvas.style.width = `${rect.width}px`
-    canvas.style.height = `${rect.height}px`
-    
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    ctx.fillStyle = '#c0c0c0'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    
-    ctx.fillStyle = '#a0a0a0'
-    ctx.font = 'bold 24px Arial'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText('刮开此处', canvas.width / 2, canvas.height / 2 - 15)
-    ctx.font = '14px Arial'
-    ctx.fillText('Scratch Here', canvas.width / 2, canvas.height / 2 + 15)
+    requestAnimationFrame(() => {
+      const canvas = scratchCanvas.value
+      const container = containerRef.value
+      if (!canvas || !container) return
+      
+      const rect = container.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
+      
+      canvas.width = rect.width * window.devicePixelRatio
+      canvas.height = rect.height * window.devicePixelRatio
+      canvas.style.width = `${rect.width}px`
+      canvas.style.height = `${rect.height}px`
+      
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      
+      ctx.fillStyle = '#c0c0c0'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      ctx.fillStyle = '#a0a0a0'
+      ctx.font = 'bold 24px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('刮开此处', canvas.width / 2, canvas.height / 2 - 15)
+      ctx.font = '14px Arial'
+      ctx.fillText('Scratch Here', canvas.width / 2, canvas.height / 2 + 15)
+    })
   })
 }
 
@@ -216,7 +202,7 @@ defineExpose({
 <style scoped>
 .scratch-canvas-container {
   position: relative;
-  display: block;
+  display: inline-block;
   border-radius: 10px;
   overflow: hidden;
 }
