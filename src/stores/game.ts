@@ -11,7 +11,7 @@ const lotteries: Lottery[] = [
     name: '好运十倍',
     price: 50,
     maxPrize: 100,
-    probability: '1:3.5',
+    probability: '1:3.3',
     theme: 'gold',
     type: 'number',
     playType: 'numberMatch',
@@ -65,11 +65,11 @@ const lotteries: Lottery[] = [
 
 const prizeConfigs: Record<string, { result: LotteryResult; prize: number; probability: number }[]> = {
   '1': [
-    { result: 'grand', prize: 100, probability: 0.01 },
-    { result: 'first', prize: 50, probability: 0.03 },
-    { result: 'second', prize: 20, probability: 0.08 },
-    { result: 'third', prize: 10, probability: 0.18 },
-    { result: 'none', prize: 0, probability: 0.70 }
+    { result: 'grand', prize: 100, probability: 0.005 },
+    { result: 'first', prize: 50, probability: 0.025 },
+    { result: 'second', prize: 20, probability: 0.075 },
+    { result: 'third', prize: 10, probability: 0.1975 },
+    { result: 'none', prize: 0, probability: 0.6975 }
   ],
   '2': [
     { result: 'grand', prize: 500, probability: 0.005 },
@@ -118,6 +118,10 @@ function generateNumberMatchContent(): {
     allNumbers.push(i.toString().padStart(2, '0'))
   }
   
+  // 根据 prizeConfigs 确定本次目标奖金
+  const { prize: targetPrize } = determinePrize('1')
+  
+  // 选择 5 个中奖号码
   const availableForWinning = [...allNumbers]
   const winningValues: string[] = []
   
@@ -126,19 +130,34 @@ function generateNumberMatchContent(): {
     winningValues.push(availableForWinning.splice(idx, 1)[0])
   }
   
+  // 生成 20 个我的号码
   const basePrizes = [5, 10, 20, 50, 100, 200, 500, 1000, 20, 50, 5, 10, 20, 50, 100, 200, 500, 1000, 20, 50]
   const myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }> = []
-  const availableForMyNumbers = [...allNumbers]
   
-  for (let i = 0; i < 20; i++) {
+  // 从我的号码池中排除所有中奖号码，避免意外中奖
+  let availableForMyNumbers = [...allNumbers].filter(n => !winningValues.includes(n))
+  
+  if (targetPrize > 0) {
+    // 中奖：选择第一个中奖号码承载目标奖金
+    const winningValue = winningValues[0]
+    myNumbers.push({
+      value: winningValue,
+      prize: targetPrize,
+      isWinning: true,
+      isRevealed: false
+    })
+  }
+  
+  // 填充剩余我的号码
+  const remainingCount = 20 - myNumbers.length
+  for (let i = 0; i < remainingCount; i++) {
     const idx = Math.floor(Math.random() * availableForMyNumbers.length)
     const value = availableForMyNumbers.splice(idx, 1)[0]
-    const isWinning = winningValues.includes(value)
     
     myNumbers.push({
       value,
       prize: basePrizes[i] * 10,
-      isWinning,
+      isWinning: false,
       isRevealed: false
     })
   }
