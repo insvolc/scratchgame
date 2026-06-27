@@ -107,7 +107,7 @@ function generateId(): string {
 }
 
 // 好运十倍 - 数字匹配型（符合现实玩法）
-// 规则：中奖号码区（5个号码）和我的号码区（10个号码，每个带奖金）都被覆盖
+// 规则：中奖号码区（5个号码）和我的号码区（20个号码，每个带奖金）都被覆盖
 // 刮开后，若我的号码与任一中奖号码相同，即获得该号码下方的奖金
 function generateNumberMatchContent(): { 
   myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>;
@@ -126,18 +126,18 @@ function generateNumberMatchContent(): {
     winningValues.push(availableForWinning.splice(idx, 1)[0])
   }
   
-  const basePrizes = [5, 10, 20, 50, 100, 200, 500, 1000, 20, 50]
+  const basePrizes = [5, 10, 20, 50, 100, 200, 500, 1000, 20, 50, 5, 10, 20, 50, 100, 200, 500, 1000, 20, 50]
   const myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }> = []
   const availableForMyNumbers = [...allNumbers]
   
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     const idx = Math.floor(Math.random() * availableForMyNumbers.length)
     const value = availableForMyNumbers.splice(idx, 1)[0]
     const isWinning = winningValues.includes(value)
     
     myNumbers.push({
       value,
-      prize: basePrizes[i % basePrizes.length] * 10,
+      prize: basePrizes[i] * 10,
       isWinning,
       isRevealed: false
     })

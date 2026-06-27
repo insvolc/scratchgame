@@ -89,8 +89,8 @@
             </div>
             
             <div class="match-result" v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)">
-              <span class="match-count">匹配 {{ getMatchCount(currentLottery) }} 个号码</span>
-              <span class="total-prize">共获得 {{ getTotalPrize(currentLottery) }} 金币</span>
+              <span class="match-count">匹配 {{ selectedMyNumbers.size }} 个号码</span>
+              <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
             </div>
           </div>
           
@@ -332,40 +332,31 @@
             </div>
           </div>
           
-          <!-- 结果展示 -->
-          <div v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)" class="result-section">
-            <div class="result-icon">
-              {{ resultIcon }}
-            </div>
-            <div class="result-text">{{ resultText }}</div>
-            <div class="prize-amount">
-              {{ currentLottery.prize && currentLottery.prize > 0 ? `+${currentLottery.prize}` : 0 }} 💰
-            </div>
-          </div>
-          
           <!-- 操作按钮 -->
           <div class="lottery-footer">
-            <button 
-              v-if="!currentLottery.isScratched" 
-              class="action-btn reveal-all-btn"
-              @click="revealAll"
-            >
-              一键刮开
-            </button>
-            <button 
-              v-if="currentLottery.isScratched && hasNextLottery" 
-              class="action-btn next-btn"
-              @click="goToNext"
-            >
-              再刮一张
-            </button>
-            <button 
-              v-if="currentLottery.isScratched" 
-              class="action-btn back-btn"
-              @click="goBack"
-            >
-              返回背包
-            </button>
+            <div v-if="!currentLottery.isScratched" class="reveal-section">
+              <button 
+                class="action-btn reveal-all-btn"
+                @click="revealAll"
+              >
+                一键刮开
+              </button>
+            </div>
+            <div class="action-section">
+              <button 
+                v-if="hasNextLottery" 
+                class="action-btn next-btn"
+                @click="goToNext"
+              >
+                再刮一张
+              </button>
+              <button 
+                class="action-btn back-btn"
+                @click="goBack"
+              >
+                返回背包
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -393,6 +384,7 @@ const selectedMyNumbers = ref<Set<number>>(new Set())
 const scratchCanvasRefs = ref<Map<string, InstanceType<typeof ScratchCanvas>>>(new Map())
 const revealedAreas = ref<Set<string>>(new Set())
 const hasClickedWinningNumber = ref(false)
+const claimedPrize = ref(0)
 
 const totalScratchAreas = computed(() => {
   const lottery = currentLottery.value
@@ -411,31 +403,7 @@ const totalScratchAreas = computed(() => {
   return count
 })
 
-const resultIcon = computed(() => {
-  if (!currentLottery.value?.result) return '❓'
-  const icons: Record<string, string> = {
-    grand: '🏆',
-    first: '🥇',
-    second: '🥈',
-    third: '🥉',
-    fourth: '🎁',
-    none: '😢'
-  }
-  return icons[currentLottery.value.result] || '❓'
-})
 
-const resultText = computed(() => {
-  if (!currentLottery.value?.result) return ''
-  const texts: Record<string, string> = {
-    grand: '特等奖！恭喜你！',
-    first: '一等奖！太棒了！',
-    second: '二等奖！不错哦！',
-    third: '三等奖！继续加油！',
-    fourth: '四等奖！小有收获！',
-    none: '谢谢参与，再接再厉！'
-  }
-  return texts[currentLottery.value.result] || ''
-})
 
 const hasNextLottery = computed(() => {
   return (backpack.value || []).some(item => !item.isScratched && item.id !== currentLottery.value?.id)
@@ -444,6 +412,17 @@ const hasNextLottery = computed(() => {
 const hasWinningNumbers = computed(() => {
   if (!currentLottery.value?.myNumbers) return false
   return currentLottery.value.myNumbers.some(n => n.isWinning)
+})
+
+const displayPrize = computed(() => {
+  const lottery = currentLottery.value
+  if (!lottery) return 0
+  
+  if (lottery.myNumbers && hasWinningNumbers.value) {
+    return claimedPrize.value
+  }
+  
+  return lottery.prize || 0
 })
 
 function getLotteryPrice(lotteryId: string): number {
@@ -457,15 +436,7 @@ function getLotteryPrice(lotteryId: string): number {
   return prices[lotteryId] || 0
 }
 
-function getMatchCount(item: BackpackItem): number {
-  if (!item.myNumbers) return 0
-  return item.myNumbers.filter(n => n.isWinning).length
-}
 
-function getTotalPrize(item: BackpackItem): number {
-  if (!item.myNumbers) return 0
-  return item.myNumbers.filter(n => n.isWinning).reduce((sum, n) => sum + (n.prize || 0), 0)
-}
 
 function handleNumberClick(index: number) {
   if (!currentLottery.value?.myNumbers) return
@@ -477,8 +448,8 @@ function handleNumberClick(index: number) {
     next.add(index)
     selectedMyNumbers.value = next
     
-    // 点击中奖号码时进行金币结算
     if (num.prize && num.prize > 0) {
+      claimedPrize.value += num.prize
       gameStore.addCoins(num.prize)
       showResultAnimation.value = true
       setTimeout(() => {
@@ -527,6 +498,25 @@ function onRevealed() {
 function revealAll() {
   if (currentLottery.value) {
     gameStore.scratchLottery(currentLottery.value.id)
+    
+    if (currentLottery.value.myNumbers && currentLottery.value.prize && currentLottery.value.prize > 0) {
+      const remainingPrize = currentLottery.value.prize - claimedPrize.value
+      if (remainingPrize > 0) {
+        claimedPrize.value = currentLottery.value.prize
+        gameStore.addCoins(remainingPrize)
+        showResultAnimation.value = true
+        setTimeout(() => {
+          showResultAnimation.value = false
+        }, 2000)
+      }
+      
+      const winningIndices = currentLottery.value.myNumbers
+        .map((num, idx) => num.isWinning ? idx : -1)
+        .filter(idx => idx !== -1)
+      const next = new Set(selectedMyNumbers.value)
+      winningIndices.forEach(idx => next.add(idx))
+      selectedMyNumbers.value = next
+    }
   }
 }
 
@@ -535,7 +525,7 @@ function goBack() {
 }
 
 function goToNext() {
-  const nextLottery = (backpack.value || []).find(item => !item.isScratched)
+  const nextLottery = (backpack.value || []).find(item => !item.isScratched && item.id !== currentLottery.value?.id)
   if (nextLottery) {
     gameStore.selectLottery(nextLottery)
     nextTick(() => {
@@ -547,6 +537,7 @@ function goToNext() {
 onMounted(() => {
   showResultAnimation.value = false
   hasClickedWinningNumber.value = false
+  claimedPrize.value = 0
 })
 
 watch(() => currentLottery.value?.id, () => {
@@ -554,6 +545,19 @@ watch(() => currentLottery.value?.id, () => {
   selectedMyNumbers.value.clear()
   revealedAreas.value.clear()
   hasClickedWinningNumber.value = false
+  claimedPrize.value = 0
+})
+
+watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
+  if (newVal === true && oldVal === false && currentLottery.value?.prize && currentLottery.value.prize > 0) {
+    if (!currentLottery.value.myNumbers) {
+      gameStore.addCoins(currentLottery.value.prize)
+      showResultAnimation.value = true
+      setTimeout(() => {
+        showResultAnimation.value = false
+      }, 2000)
+    }
+  }
 })
 </script>
 
@@ -747,9 +751,9 @@ watch(() => currentLottery.value?.id, () => {
 .my-numbers-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(42px, 1fr));
-  gap: 6px;
-  padding: 10px;
+  grid-template-columns: repeat(5, minmax(36px, 1fr));
+  gap: 4px;
+  padding: 8px;
   background: #f9f9f9;
   border-radius: 8px;
 }
@@ -760,19 +764,19 @@ watch(() => currentLottery.value?.id, () => {
 }
 
 .number-cell-with-prize {
-  min-width: 42px;
-  min-height: 48px;
+  min-width: 36px;
+  min-height: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background: #fff;
   border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: bold;
   color: #333;
-  padding: 4px;
+  padding: 3px;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
 }
@@ -790,12 +794,12 @@ watch(() => currentLottery.value?.id, () => {
 }
 
 .num-value {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
 }
 
 .num-prize {
-  font-size: 11px;
+  font-size: 9px;
   margin-top: 1px;
 }
 
@@ -1076,35 +1080,21 @@ watch(() => currentLottery.value?.id, () => {
   color: #333;
 }
 
-/* 结果区 */
-.result-section {
-  padding: 20px;
-  text-align: center;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 107, 0.1));
-}
-
-.result-icon {
-  font-size: 64px;
-  margin-bottom: 10px;
-}
-
-.result-text {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.prize-amount {
-  font-size: 32px;
-  font-weight: bold;
-  color: #ff6b6b;
-}
-
 .lottery-footer {
   padding: 20px;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reveal-section {
+  width: 100%;
+}
+
+.action-section {
+  display: flex;
   gap: 10px;
+  width: 100%;
 }
 
 .action-btn {
@@ -1121,7 +1111,7 @@ watch(() => currentLottery.value?.id, () => {
 .reveal-all-btn {
   background: linear-gradient(135deg, #ffd700, #ffb700);
   color: #8B4513;
-  flex: 2;
+  width: 100%;
 }
 
 .next-btn {
