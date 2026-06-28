@@ -354,7 +354,7 @@
                       v-for="(cell, colIdx) in row"
                       :key="'xicell-' + rowIdx + '-' + colIdx"
                       class="xi-xiangfeng-cell"
-                      :class="{ winning: cell.isWinning, double: cell.multiplier === 2 }"
+                      :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
                     >
                       <span class="xi-symbol">{{ cell.symbol }}</span>
                       <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
@@ -372,13 +372,18 @@
                     v-for="(cell, colIdx) in row"
                     :key="'xicell-' + rowIdx + '-' + colIdx"
                     class="xi-xiangfeng-cell"
-                    :class="{ winning: cell.isWinning, double: cell.multiplier === 2 }"
+                    :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
+                    @click="handleXiCellClick(rowIdx, colIdx)"
                   >
                     <span class="xi-symbol">{{ cell.symbol }}</span>
                     <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="match-result" v-if="currentLottery.isScratched && currentLottery.xiXiangFengCells">
+              <span class="match-count">已领取 {{ selectedXiCells.size }} 个中奖图符</span>
+              <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
             </div>
           </div>
 
@@ -431,6 +436,7 @@ const coins = computed(() => gameStore.coins)
 
 const showResultAnimation = ref(false)
 const selectedMyNumbers = ref<Set<number>>(new Set())
+const selectedXiCells = ref<Set<string>>(new Set())
 const scratchCanvasRefs = ref<Map<string, InstanceType<typeof ScratchCanvas>>>(new Map())
 const revealedAreas = ref<Set<string>>(new Set())
 const hasClickedWinningNumber = ref(false)
@@ -469,6 +475,10 @@ const displayPrize = computed(() => {
   if (!lottery) return 0
   
   if (lottery.myNumbers && hasWinningNumbers.value) {
+    return claimedPrize.value
+  }
+
+  if (lottery.xiXiangFengCells) {
     return claimedPrize.value
   }
   
@@ -512,6 +522,29 @@ function handleNumberClick(index: number) {
   hasClickedWinningNumber.value = true
 }
 
+function handleXiCellClick(rowIdx: number, colIdx: number) {
+  if (!currentLottery.value?.xiXiangFengCells) return
+  const cell = currentLottery.value.xiXiangFengCells[rowIdx]?.[colIdx]
+  if (!cell || !cell.isWinning) return
+  
+  const key = `${rowIdx}-${colIdx}`
+  const next = new Set(selectedXiCells.value)
+  if (!next.has(key)) {
+    next.add(key)
+    selectedXiCells.value = next
+    
+    const prize = cell.basePrize * cell.multiplier
+    if (prize > 0) {
+      claimedPrize.value += prize
+      gameStore.addCoins(prize)
+      showResultAnimation.value = true
+      setTimeout(() => {
+        showResultAnimation.value = false
+      }, 2000)
+    }
+  }
+}
+
 function getConfettiStyle(index: number) {
   const colors = ['#ffd700', '#ff6b6b', '#4ECDC4', '#44A08D', '#ff8E53']
   const left = Math.random() * 100
@@ -527,19 +560,6 @@ function getConfettiStyle(index: number) {
     width: `${size}px`,
     height: `${size}px`
   }
-}
-
-function settlePrize() {
-  const lottery = currentLottery.value
-  if (!lottery || !lottery.prize || lottery.prize <= 0) return
-  const remainingPrize = lottery.prize - claimedPrize.value
-  if (remainingPrize <= 0) return
-  claimedPrize.value = lottery.prize
-  gameStore.addCoins(remainingPrize)
-  showResultAnimation.value = true
-  setTimeout(() => {
-    showResultAnimation.value = false
-  }, 2000)
 }
 
 function onAreaRevealed(areaId: string) {
@@ -560,13 +580,9 @@ function onAreaRevealed(areaId: string) {
     return
   }
   
-  // 其他玩法单个区域刮开即可
+  // 其他玩法单个区域刮开即可（喜相逢由用户点击领奖，不自动结算）
   setTimeout(() => {
     gameStore.scratchLottery(lottery.id)
-    // 喜相逢手动刮开后立即结算
-    if (lottery.xiXiangFengCells) {
-      settlePrize()
-    }
   }, 300)
 }
 
@@ -598,11 +614,6 @@ function revealAll() {
       winningIndices.forEach(idx => next.add(idx))
       selectedMyNumbers.value = next
     }
-    
-    // 喜相逢一键刮开后立即结算
-    if (currentLottery.value.xiXiangFengCells) {
-      settlePrize()
-    }
   }
 }
 
@@ -624,11 +635,13 @@ onMounted(() => {
   showResultAnimation.value = false
   hasClickedWinningNumber.value = false
   claimedPrize.value = 0
+  selectedXiCells.value.clear()
 })
 
 watch(() => currentLottery.value?.id, () => {
   showResultAnimation.value = false
   selectedMyNumbers.value.clear()
+  selectedXiCells.value.clear()
   revealedAreas.value.clear()
   hasClickedWinningNumber.value = false
   claimedPrize.value = 0
@@ -636,7 +649,7 @@ watch(() => currentLottery.value?.id, () => {
 
 watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   if (newVal === true && oldVal === false && currentLottery.value?.prize && currentLottery.value.prize > 0) {
-    if (!currentLottery.value.myNumbers && claimedPrize.value < currentLottery.value.prize) {
+    if (!currentLottery.value.myNumbers && !currentLottery.value.xiXiangFengCells && claimedPrize.value < currentLottery.value.prize) {
       gameStore.addCoins(currentLottery.value.prize - claimedPrize.value)
       claimedPrize.value = currentLottery.value.prize
       showResultAnimation.value = true
