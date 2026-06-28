@@ -76,7 +76,6 @@ function refreshGame() {
 
 function addCoinsDebug() {
   gameStore.addCoins(100)
-  alert('已添加 100 金币！')
 }
 </script>
 
