@@ -61,11 +61,12 @@
                     @revealed="() => onAreaRevealed('mynumbers')"
                   >
                     <div class="my-numbers-grid">
-                      <div 
-                        v-for="(num, index) in currentLottery.myNumbers" 
+                      <div
+                        v-for="(num, index) in currentLottery.myNumbers"
                         :key="'num-' + index"
                         class="number-cell-with-prize"
                         :class="{ winning: selectedMyNumbers.has(index) }"
+                        @click="handleNumberClick(index)"
                       >
                         <span class="num-value">{{ num.value }}</span>
                         <span class="num-prize">{{ num.prize }}💰</span>
@@ -355,6 +356,7 @@
                       :key="'xicell-' + rowIdx + '-' + colIdx"
                       class="xi-xiangfeng-cell"
                       :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
+                      @click="handleXiCellClick(rowIdx, colIdx)"
                     >
                       <span class="xi-symbol">{{ cell.symbol }}</span>
                       <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>

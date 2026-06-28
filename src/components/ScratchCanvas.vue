@@ -1,15 +1,18 @@
 <template>
-  <div class="scratch-canvas-container" ref="containerRef">
-    <canvas 
-      ref="scratchCanvas" 
+  <div
+    class="scratch-canvas-container"
+    ref="containerRef"
+    @mousedown="startScratch"
+    @mousemove="scratch"
+    @mouseup="stopScratch"
+    @mouseleave="stopScratch"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="stopScratch"
+  >
+    <canvas
+      ref="scratchCanvas"
       class="scratch-canvas"
-      @mousedown="startScratch"
-      @mousemove="scratch"
-      @mouseup="stopScratch"
-      @mouseleave="stopScratch"
-      @touchstart="handleTouchStart"
-      @touchmove="handleTouchMove"
-      @touchend="stopScratch"
     ></canvas>
     <div class="scratch-content">
       <slot></slot>
@@ -88,7 +91,6 @@ function stopScratch() {
 
 function handleTouchStart(e: TouchEvent) {
   if (isScratched.value) return
-  e.preventDefault()
   isScratching.value = true
   const touch = e.touches[0]
   scratch({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent)
@@ -205,6 +207,8 @@ defineExpose({
   display: inline-block;
   border-radius: 10px;
   overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
 }
 
 .scratch-canvas {
@@ -213,13 +217,17 @@ defineExpose({
   left: 0;
   width: 100%;
   height: 100%;
-  cursor: pointer;
   z-index: 2;
+  pointer-events: none;
 }
 
 .scratch-content {
   position: relative;
   z-index: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .scratch-hint {
