@@ -60,6 +60,17 @@ const lotteries: Lottery[] = [
     type: 'mixed',
     playType: 'bonus',
     description: '三大玩法，一票三次中奖机会！数字匹配+找幸运符+奖金即开，三重惊喜等你来'
+  },
+  {
+    id: '6',
+    name: '喜相逢',
+    price: 20,
+    maxPrize: 800,
+    probability: '1:2.9',
+    theme: 'red-gold',
+    type: 'xi',
+    playType: 'xiXiangFeng',
+    description: '刮开覆盖层，出现“喜”字图符可获得对应奖金，出现“囍”字图符可获得对应奖金的两倍，25次机会兼中兼得'
   }
 ]
 
@@ -99,6 +110,13 @@ const prizeConfigs: Record<string, { result: LotteryResult; prize: number; proba
     { result: 'third', prize: 100, probability: 0.08 },
     { result: 'fourth', prize: 50, probability: 0.12 },
     { result: 'none', prize: 0, probability: 0.7615 }
+  ],
+  '6': [
+    { result: 'grand', prize: 800, probability: 0.005 },
+    { result: 'first', prize: 50, probability: 0.025 },
+    { result: 'second', prize: 10, probability: 0.075 },
+    { result: 'third', prize: 5, probability: 0.20 },
+    { result: 'none', prize: 0, probability: 0.695 }
   ]
 }
 
@@ -339,6 +357,81 @@ function generateMixedContent(): {
   return { numberArea, symbolArea, bonusPrizes }
 }
 
+// 喜相逢 - 5×5 图符型（符合现实 20 元福彩玩法）
+// 规则：25 个圆形图符下方覆盖奖金；刮出“喜”得对应奖金，刮出“囍”得两倍奖金，兼中兼得
+function generateXiXiangFengContent(): {
+  xiXiangFengCells: Array<Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }>>
+} {
+  const { prize: targetPrize } = determinePrize('6')
+  const rows = 5
+  const cols = 5
+  const cells: Array<Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }>> = []
+  
+  // 填充非中奖的候选图案（参考现实喜相逢的祥云、花卉、瑞雪、星光等传统纹样，使用黑色线条风格，仅用于展示，不中奖）
+  const fillerPrizes = [5, 10, 20, 50, 100, 200, 500, 1000]
+  const nonWinSymbols = ['☁', '✿', '❀', '✾', '✽', '❋', '✣', '✤', '❉', '❅', '❈', '❇']
+  
+  for (let r = 0; r < rows; r++) {
+    const row: Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }> = []
+    for (let c = 0; c < cols; c++) {
+      row.push({
+        symbol: nonWinSymbols[Math.floor(Math.random() * nonWinSymbols.length)],
+        basePrize: fillerPrizes[Math.floor(Math.random() * fillerPrizes.length)],
+        multiplier: 1,
+        isWinning: false,
+        isRevealed: false
+      })
+    }
+    cells.push(row)
+  }
+  
+  if (targetPrize > 0) {
+    // 按目标奖金拆分中奖点，体现“兼中兼得”
+    let remaining = targetPrize
+    const winPlans: Array<{ basePrize: number; multiplier: number }> = []
+    
+    if (remaining >= 800) {
+      // 特等奖：一个囍（400×2）
+      winPlans.push({ basePrize: 400, multiplier: 2 })
+      remaining -= 800
+    } else if (remaining >= 50) {
+      // 一等奖：一个囍（25×2）
+      winPlans.push({ basePrize: 25, multiplier: 2 })
+      remaining -= 50
+    } else {
+      // 二、三等奖使用喜直接对应
+      while (remaining > 0) {
+        const prize = remaining >= 10 ? 10 : remaining
+        winPlans.push({ basePrize: prize, multiplier: 1 })
+        remaining -= prize
+      }
+    }
+    
+    // 随机放置中奖单元格
+    const positions: Array<{ r: number; c: number }> = []
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        positions.push({ r, c })
+      }
+    }
+    positions.sort(() => Math.random() - 0.5)
+    
+    for (let i = 0; i < winPlans.length && i < positions.length; i++) {
+      const { r, c } = positions[i]
+      const plan = winPlans[i]
+      cells[r][c] = {
+        symbol: plan.multiplier === 2 ? '囍' : '喜',
+        basePrize: plan.basePrize,
+        multiplier: plan.multiplier,
+        isWinning: true,
+        isRevealed: false
+      }
+    }
+  }
+  
+  return { xiXiangFengCells: cells }
+}
+
 function determinePrize(lotteryId: string): { result: LotteryResult; prize: number } {
   const config = prizeConfigs[lotteryId] || prizeConfigs['1']
   const random = Math.random()
@@ -366,6 +459,8 @@ function generateLotteryContent(lottery: Lottery): Record<string, unknown> {
       return generateMatch3Content()
     case 'bonus':
       return generateMixedContent()
+    case 'xiXiangFeng':
+      return generateXiXiangFengContent()
     default:
       return generateNumberMatchContent()
   }
@@ -419,17 +514,32 @@ export const useGameStore = defineStore('game', () => {
       const totalPrize = myNumbers
         .filter(n => winningNumbers.includes(n.value))
         .reduce((sum, n) => sum + (n.prize || 0), 0)
-      
+
       let result: LotteryResult = 'none'
       if (totalPrize >= 1000) result = 'grand'
       else if (totalPrize >= 500) result = 'first'
       else if (totalPrize >= 100) result = 'second'
       else if (totalPrize >= 50) result = 'third'
       else if (totalPrize > 0) result = 'fourth'
-      
+
       return { result, prize: totalPrize }
     }
-    
+
+    if (lotteryId === '6' && content.xiXiangFengCells) {
+      const cells = content.xiXiangFengCells as Array<Array<{ basePrize: number; multiplier: number; isWinning: boolean }>>
+      const totalPrize = cells.flat().reduce((sum, cell) => {
+        return cell.isWinning ? sum + cell.basePrize * cell.multiplier : sum
+      }, 0)
+
+      let result: LotteryResult = 'none'
+      if (totalPrize >= 500) result = 'grand'
+      else if (totalPrize >= 50) result = 'first'
+      else if (totalPrize >= 10) result = 'second'
+      else if (totalPrize > 0) result = 'third'
+
+      return { result, prize: totalPrize }
+    }
+
     return determinePrize(lotteryId)
   }
   
@@ -493,8 +603,16 @@ export const useGameStore = defineStore('game', () => {
           item.bonusPrizes[cellIndex] && (item.bonusPrizes[cellIndex].isRevealed = true)
         }
         break
+      case 'xiXiangFeng':
+        if (item.xiXiangFengCells) {
+          const row = item.xiXiangFengCells[areaIndex]
+          if (row && row[cellIndex]) {
+            row[cellIndex] = { ...row[cellIndex], isRevealed: true }
+          }
+        }
+        break
     }
-    
+
     checkAutoReveal(item)
     saveState()
   }
@@ -542,7 +660,13 @@ export const useGameStore = defineStore('game', () => {
     if (item.bonusPrizes) {
       item.bonusPrizes = item.bonusPrizes.map(b => ({ ...b, isRevealed: true }))
     }
-    
+
+    if (item.xiXiangFengCells) {
+      item.xiXiangFengCells = item.xiXiangFengCells.map(row =>
+        row.map(cell => ({ ...cell, isRevealed: true }))
+      )
+    }
+
     saveState()
   }
   
@@ -591,7 +715,13 @@ export const useGameStore = defineStore('game', () => {
         totalCells += item.bonusPrizes.length
         revealedCells += item.bonusPrizes.filter(b => b.isRevealed).length
       }
-      
+      if (item.xiXiangFengCells) {
+        item.xiXiangFengCells.forEach(row => {
+          totalCells += row.length
+          revealedCells += row.filter(cell => cell.isRevealed).length
+        })
+      }
+
       if (totalCells > 0 && revealedCells / totalCells >= 0.6) {
         scratchLottery(item.id)
       }
@@ -607,7 +737,14 @@ export const useGameStore = defineStore('game', () => {
   }
   
   function clearScratched() {
-    backpack.value = backpack.value.filter(item => !item.isScratched)
+    for (let i = backpack.value.length - 1; i >= 0; i--) {
+      if (backpack.value[i].isScratched) {
+        backpack.value.splice(i, 1)
+      }
+    }
+    if (currentLottery.value?.isScratched) {
+      currentLottery.value = null
+    }
     saveState()
   }
   

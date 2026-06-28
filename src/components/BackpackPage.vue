@@ -6,8 +6,8 @@
       </button>
       <h1 class="page-title">我的背包</h1>
       <button 
-        v-if="scratchedCount > 0" 
         class="clear-btn" 
+        :disabled="scratchedCount === 0"
         @click="clearScratched"
       >
         清空已刮
@@ -107,9 +107,7 @@ function selectLottery(item: BackpackItem) {
 }
 
 function clearScratched() {
-  if (confirm('确定要清空所有已刮开的彩票吗？')) {
-    gameStore.clearScratched()
-  }
+  gameStore.clearScratched()
 }
 </script>
 
@@ -261,6 +259,10 @@ function clearScratched() {
 
 .lottery-cover.rainbow {
   background: linear-gradient(135deg, #ff6b6b, #ffd700, #4ECDC4);
+}
+
+.lottery-cover.red-gold {
+  background: linear-gradient(135deg, #ff6b6b, #ffd700);
 }
 
 .lottery-info {

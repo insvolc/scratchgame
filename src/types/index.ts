@@ -8,7 +8,7 @@ export interface Lottery {
   probability: string
   theme: string
   type: string
-  playType: 'numberMatch' | 'symbolMatch' | 'lineMatch' | 'match3' | 'bonus'
+  playType: 'numberMatch' | 'symbolMatch' | 'lineMatch' | 'match3' | 'bonus' | 'xiXiangFeng'
   description: string
 }
 
@@ -33,6 +33,7 @@ export interface BackpackItem {
   }
   symbolArea?: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> }
   bonusPrizes?: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
+  xiXiangFengCells?: Array<Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }>>
 }
 
 export interface GameState {

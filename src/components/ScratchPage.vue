@@ -332,6 +332,56 @@
             </div>
           </div>
           
+          <!-- 喜相逢 - 5×5 图符型 -->
+          <div v-if="currentLottery.xiXiangFengCells" class="game-area">
+            <div class="area-title">囍 喜相逢</div>
+            <div class="xi-xiangfeng-hint">
+              <span>“喜”得对应奖金，“囍”得两倍奖金，兼中兼得</span>
+            </div>
+            <div class="scratch-wrapper xi-xiangfeng-scratch">
+              <ScratchCanvas
+                v-if="!currentLottery.isScratched"
+                :brush-size="22"
+                @revealed="() => onAreaRevealed('xixiangfeng')"
+              >
+                <div class="xi-xiangfeng-grid">
+                  <div
+                    v-for="(row, rowIdx) in currentLottery.xiXiangFengCells"
+                    :key="'xirow-' + rowIdx"
+                    class="xi-xiangfeng-row"
+                  >
+                    <div
+                      v-for="(cell, colIdx) in row"
+                      :key="'xicell-' + rowIdx + '-' + colIdx"
+                      class="xi-xiangfeng-cell"
+                      :class="{ winning: cell.isWinning, double: cell.multiplier === 2 }"
+                    >
+                      <span class="xi-symbol">{{ cell.symbol }}</span>
+                      <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
+                    </div>
+                  </div>
+                </div>
+              </ScratchCanvas>
+              <div v-else class="xi-xiangfeng-grid">
+                <div
+                  v-for="(row, rowIdx) in currentLottery.xiXiangFengCells"
+                  :key="'xirow-' + rowIdx"
+                  class="xi-xiangfeng-row"
+                >
+                  <div
+                    v-for="(cell, colIdx) in row"
+                    :key="'xicell-' + rowIdx + '-' + colIdx"
+                    class="xi-xiangfeng-cell"
+                    :class="{ winning: cell.isWinning, double: cell.multiplier === 2 }"
+                  >
+                    <span class="xi-symbol">{{ cell.symbol }}</span>
+                    <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 操作按钮 -->
           <div class="lottery-footer">
             <div v-if="!currentLottery.isScratched" class="reveal-section">
@@ -398,8 +448,8 @@ const totalScratchAreas = computed(() => {
   if (lottery.numberArea) count += 1
   if (lottery.symbolArea) count += 1
   if (lottery.bonusPrizes) count += 1
-  
-  console.log('totalScratchAreas calculated:', count)
+  if (lottery.xiXiangFengCells) count += 1
+
   return count
 })
 
@@ -427,11 +477,12 @@ const displayPrize = computed(() => {
 
 function getLotteryPrice(lotteryId: string): number {
   const prices: Record<string, number> = {
-    '1': 10,
+    '1': 50,
     '2': 20,
     '3': 50,
     '4': 5,
-    '5': 100
+    '5': 100,
+    '6': 20
   }
   return prices[lotteryId] || 0
 }
@@ -478,6 +529,19 @@ function getConfettiStyle(index: number) {
   }
 }
 
+function settlePrize() {
+  const lottery = currentLottery.value
+  if (!lottery || !lottery.prize || lottery.prize <= 0) return
+  const remainingPrize = lottery.prize - claimedPrize.value
+  if (remainingPrize <= 0) return
+  claimedPrize.value = lottery.prize
+  gameStore.addCoins(remainingPrize)
+  showResultAnimation.value = true
+  setTimeout(() => {
+    showResultAnimation.value = false
+  }, 2000)
+}
+
 function onAreaRevealed(areaId: string) {
   if (currentLottery.value?.isScratched) return
   
@@ -499,6 +563,10 @@ function onAreaRevealed(areaId: string) {
   // 其他玩法单个区域刮开即可
   setTimeout(() => {
     gameStore.scratchLottery(lottery.id)
+    // 喜相逢手动刮开后立即结算
+    if (lottery.xiXiangFengCells) {
+      settlePrize()
+    }
   }, 300)
 }
 
@@ -529,6 +597,11 @@ function revealAll() {
       const next = new Set(selectedMyNumbers.value)
       winningIndices.forEach(idx => next.add(idx))
       selectedMyNumbers.value = next
+    }
+    
+    // 喜相逢一键刮开后立即结算
+    if (currentLottery.value.xiXiangFengCells) {
+      settlePrize()
     }
   }
 }
@@ -563,8 +636,9 @@ watch(() => currentLottery.value?.id, () => {
 
 watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   if (newVal === true && oldVal === false && currentLottery.value?.prize && currentLottery.value.prize > 0) {
-    if (!currentLottery.value.myNumbers) {
-      gameStore.addCoins(currentLottery.value.prize)
+    if (!currentLottery.value.myNumbers && claimedPrize.value < currentLottery.value.prize) {
+      gameStore.addCoins(currentLottery.value.prize - claimedPrize.value)
+      claimedPrize.value = currentLottery.value.prize
       showResultAnimation.value = true
       setTimeout(() => {
         showResultAnimation.value = false
@@ -1104,6 +1178,79 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 .bonus-cell.winning {
   background: linear-gradient(135deg, #ffd700, #ffb700);
   animation: pulse 1s infinite;
+}
+
+/* 喜相逢 */
+.xi-xiangfeng-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.xi-xiangfeng-scratch .scratch-canvas-container {
+  display: block;
+  width: 100%;
+}
+
+.xi-xiangfeng-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #fff5f5, #fff0f0);
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.xi-xiangfeng-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.xi-xiangfeng-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  font-weight: bold;
+  color: #222;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.xi-xiangfeng-cell.winning {
+  background: linear-gradient(135deg, #ff6b6b, #ffd700);
+  border-color: #ff6b6b;
+  color: #8B4513;
+  animation: pulse 1s infinite;
+}
+
+.xi-xiangfeng-cell.double {
+  border-color: #ff1744;
+  box-shadow: 0 0 12px rgba(255, 23, 68, 0.3);
+}
+
+.xi-symbol {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.xi-xiangfeng-cell.winning .xi-symbol {
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.xi-prize {
+  font-size: 10px;
+  margin-top: 1px;
 }
 
 /* 通用 */

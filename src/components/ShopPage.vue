@@ -70,7 +70,8 @@ function getThemeIcon(theme: string): string {
     diamond: '💎',
     red: '🏮',
     green: '🍀',
-    rainbow: '🌈'
+    rainbow: '🌈',
+    'red-gold': '囍'
   }
   return icons[theme] || '🎟️'
 }
@@ -201,6 +202,10 @@ function buyLottery(lotteryId: string) {
 
 .lottery-card.rainbow .lottery-image {
   background: linear-gradient(135deg, #ff6b6b, #ffd700, #4ECDC4);
+}
+
+.lottery-card.red-gold .lottery-image {
+  background: linear-gradient(135deg, #ff6b6b, #ffd700);
 }
 
 .lottery-info {
