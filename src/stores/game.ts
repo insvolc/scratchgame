@@ -65,8 +65,8 @@ const lotteries: Lottery[] = [
     id: '6',
     name: '喜相逢',
     price: 20,
-    maxPrize: 800,
-    probability: '1:2.9',
+    maxPrize: 500,
+    probability: '1:1.7',
     theme: 'red-gold',
     type: 'xi',
     playType: 'xiXiangFeng',
@@ -112,11 +112,11 @@ const prizeConfigs: Record<string, { result: LotteryResult; prize: number; proba
     { result: 'none', prize: 0, probability: 0.7615 }
   ],
   '6': [
-    { result: 'grand', prize: 800, probability: 0.005 },
-    { result: 'first', prize: 50, probability: 0.025 },
-    { result: 'second', prize: 10, probability: 0.075 },
-    { result: 'third', prize: 5, probability: 0.20 },
-    { result: 'none', prize: 0, probability: 0.695 }
+    { result: 'grand', prize: 500, probability: 0.005 },
+    { result: 'first', prize: 100, probability: 0.025 },
+    { result: 'second', prize: 50, probability: 0.12 },
+    { result: 'third', prize: 20, probability: 0.45 },
+    { result: 'none', prize: 0, probability: 0.40 }
   ]
 }
 
@@ -387,24 +387,20 @@ function generateXiXiangFengContent(): {
   
   if (targetPrize > 0) {
     // 按目标奖金拆分中奖点，体现“兼中兼得”
-    let remaining = targetPrize
     const winPlans: Array<{ basePrize: number; multiplier: number }> = []
     
-    if (remaining >= 800) {
-      // 特等奖：一个囍（400×2）
-      winPlans.push({ basePrize: 400, multiplier: 2 })
-      remaining -= 800
-    } else if (remaining >= 50) {
-      // 一等奖：一个囍（25×2）
-      winPlans.push({ basePrize: 25, multiplier: 2 })
-      remaining -= 50
-    } else {
-      // 二、三等奖使用喜直接对应
-      while (remaining > 0) {
-        const prize = remaining >= 10 ? 10 : remaining
-        winPlans.push({ basePrize: prize, multiplier: 1 })
-        remaining -= prize
-      }
+    if (targetPrize >= 500) {
+      // 特等奖：一个囍（250×2）
+      winPlans.push({ basePrize: 250, multiplier: 2 })
+    } else if (targetPrize >= 100) {
+      // 一等奖：一个囍（50×2）
+      winPlans.push({ basePrize: 50, multiplier: 2 })
+    } else if (targetPrize >= 50) {
+      // 二等奖：一个喜 50
+      winPlans.push({ basePrize: 50, multiplier: 1 })
+    } else if (targetPrize >= 20) {
+      // 三等奖：一个喜 20
+      winPlans.push({ basePrize: 20, multiplier: 1 })
     }
     
     // 随机放置中奖单元格
@@ -533,9 +529,10 @@ export const useGameStore = defineStore('game', () => {
 
       let result: LotteryResult = 'none'
       if (totalPrize >= 500) result = 'grand'
-      else if (totalPrize >= 50) result = 'first'
-      else if (totalPrize >= 10) result = 'second'
-      else if (totalPrize > 0) result = 'third'
+      else if (totalPrize >= 100) result = 'first'
+      else if (totalPrize >= 50) result = 'second'
+      else if (totalPrize >= 20) result = 'third'
+      else if (totalPrize > 0) result = 'fourth'
 
       return { result, prize: totalPrize }
     }
