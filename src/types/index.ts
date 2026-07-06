@@ -8,7 +8,7 @@ export interface Lottery {
   probability: string
   theme: string
   type: string
-  playType: 'numberMatch' | 'symbolMatch' | 'lineMatch' | 'match3' | 'bonus' | 'xiXiangFeng'
+  playType: 'numberMatch' | 'lineMatch' | 'match3' | 'bonus' | 'xiXiangFeng'
   description: string
 }
 
@@ -23,7 +23,6 @@ export interface BackpackItem {
   result: LotteryResult
   myNumbers?: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>
   winningNumbers?: Array<{ value: string; isRevealed: boolean }>
-  symbolAreas?: Array<{ symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>; prize: number }>
   grid?: Array<Array<{ symbol: string; isWinning: boolean; isRevealed: boolean; lineIndex: number }>>
   winningLines?: number[]
   numberAreas?: Array<{ numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>; prize: number }>

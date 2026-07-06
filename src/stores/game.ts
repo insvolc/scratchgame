@@ -8,7 +8,7 @@ const STORAGE_KEY = 'scratch_game_data'
 const lotteries: Lottery[] = [
   {
     id: '1',
-    name: '好运十倍',
+    name: '点石成金',
     price: 50,
     maxPrize: 100,
     probability: '1:3.3',
@@ -16,17 +16,6 @@ const lotteries: Lottery[] = [
     type: 'number',
     playType: 'numberMatch',
     description: '刮开"我的号码"区，对照"中奖号码"，出现相同号码即中该号码下方所示奖金'
-  },
-  {
-    id: '2',
-    name: '点石成金',
-    price: 20,
-    maxPrize: 500,
-    probability: '1:4.5',
-    theme: 'diamond',
-    type: 'symbol',
-    playType: 'symbolMatch',
-    description: '刮开覆盖层，若出现3个相同的"金块"图案，即中该游戏区内所示的奖金'
   },
   {
     id: '3',
@@ -82,13 +71,6 @@ const prizeConfigs: Record<string, { result: LotteryResult; prize: number; proba
     { result: 'third', prize: 10, probability: 0.1975 },
     { result: 'none', prize: 0, probability: 0.6975 }
   ],
-  '2': [
-    { result: 'grand', prize: 500, probability: 0.005 },
-    { result: 'first', prize: 200, probability: 0.02 },
-    { result: 'second', prize: 50, probability: 0.06 },
-    { result: 'third', prize: 20, probability: 0.12 },
-    { result: 'none', prize: 0, probability: 0.795 }
-  ],
   '3': [
     { result: 'grand', prize: 1000, probability: 0.002 },
     { result: 'first', prize: 500, probability: 0.015 },
@@ -124,7 +106,7 @@ function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2)
 }
 
-// 好运十倍 - 数字匹配型（符合现实玩法）
+// 点石成金 - 数字匹配型（符合现实玩法）
 // 规则：中奖号码区（5个号码）和我的号码区（20个号码，每个带奖金）都被覆盖
 // 刮开后，若我的号码与任一中奖号码相同，即获得该号码下方的奖金
 function generateNumberMatchContent(): { 
@@ -186,42 +168,6 @@ function generateNumberMatchContent(): {
       .sort((a, b) => parseInt(a) - parseInt(b))
       .map(value => ({ value, isRevealed: false }))
   }
-}
-
-// 点石成金 - 找符号型
-function generateSymbolMatchContent(): { 
-  areas: Array<{ 
-    symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>;
-    prize: number
-  }>
-} {
-  const areas = []
-  const areaPrizes = [200, 50, 20]
-  
-  for (let a = 0; a < 3; a++) {
-    const symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> = []
-    const isWinning = Math.random() > 0.6
-    
-    if (isWinning) {
-      for (let i = 0; i < 3; i++) {
-        symbols.push({ symbol: '💎', isWinning: true, isRevealed: false })
-      }
-      const distractionSymbol = ['👑', '⭐', '💰', '🎁', '🍀'][Math.floor(Math.random() * 5)]
-      symbols.push({ symbol: distractionSymbol, isWinning: false, isRevealed: false })
-    } else {
-      for (let i = 0; i < 4; i++) {
-        symbols.push({ 
-          symbol: ['👑', '⭐', '💰', '🎁', '🍀', '🏆', '🎯'][Math.floor(Math.random() * 7)], 
-          isWinning: false, 
-          isRevealed: false 
-        })
-      }
-    }
-    
-    areas.push({ symbols: symbols.sort(() => Math.random() - 0.5), prize: areaPrizes[a] })
-  }
-  
-  return { areas }
 }
 
 // 走进桃花源 - 九宫格连线型
@@ -447,8 +393,6 @@ function generateLotteryContent(lottery: Lottery): Record<string, unknown> {
   switch (lottery.playType) {
     case 'numberMatch':
       return generateNumberMatchContent()
-    case 'symbolMatch':
-      return generateSymbolMatchContent()
     case 'lineMatch':
       return generateGridLineContent()
     case 'match3':
@@ -584,12 +528,6 @@ export const useGameStore = defineStore('game', () => {
           item.myNumbers[cellIndex] = { ...item.myNumbers[cellIndex], isRevealed: true }
         }
         break
-      case 'symbolMatch':
-        if (item.symbolAreas) {
-          item.symbolAreas[areaIndex]?.symbols[cellIndex] && 
-          (item.symbolAreas[areaIndex].symbols[cellIndex].isRevealed = true)
-        }
-        break
       case 'match3':
         if (item.numberAreas) {
           item.numberAreas[areaIndex]?.numbers[cellIndex] && 
@@ -627,13 +565,6 @@ export const useGameStore = defineStore('game', () => {
     
     if (item.winningNumbers) {
       item.winningNumbers = item.winningNumbers.map(n => ({ ...n, isRevealed: true }))
-    }
-    
-    if (item.symbolAreas) {
-      item.symbolAreas = item.symbolAreas.map(area => ({
-        ...area,
-        symbols: area.symbols.map(s => ({ ...s, isRevealed: true }))
-      }))
     }
     
     if (item.grid) {
@@ -676,13 +607,6 @@ export const useGameStore = defineStore('game', () => {
       if (item.myNumbers) {
         totalCells += item.myNumbers.length
         revealedCells += item.myNumbers.filter(n => n.isRevealed).length
-      }
-      
-      if (item.symbolAreas) {
-        item.symbolAreas.forEach(area => {
-          totalCells += area.symbols.length
-          revealedCells += area.symbols.filter(s => s.isRevealed).length
-        })
       }
       
       if (item.grid) {

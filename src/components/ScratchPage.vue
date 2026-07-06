@@ -19,7 +19,7 @@
             <span class="lottery-price">面值：{{ getLotteryPrice(currentLottery.lotteryId) }}金币</span>
           </div>
           
-          <!-- 好运十倍 - 数字匹配（符合现实玩法） -->
+          <!-- 点石成金 - 数字匹配（符合现实玩法） -->
           <div v-if="currentLottery.myNumbers" class="game-area">
             <div class="lucky-ten-layout">
               <div class="lucky-row winning-row">
@@ -92,47 +92,6 @@
             <div class="match-result" v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)">
               <span class="match-count">匹配 {{ selectedMyNumbers.size }} 个号码</span>
               <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
-            </div>
-          </div>
-          
-          <!-- 点石成金 - 找符号 -->
-          <div v-if="currentLottery.symbolAreas" class="game-area">
-            <div class="area-title">💎 找出三个金块</div>
-            <div class="symbol-areas">
-              <div 
-                v-for="(area, areaIdx) in currentLottery.symbolAreas" 
-                :key="'area-' + areaIdx"
-                class="symbol-area-item"
-              >
-                <div class="area-prize">奖金：{{ area.prize }}</div>
-                <div class="scratch-wrapper">
-                  <ScratchCanvas 
-                    v-if="!currentLottery.isScratched"
-                    @revealed="() => onAreaRevealed('symbol-' + areaIdx)"
-                  >
-                    <div class="symbols-grid">
-                      <div 
-                        v-for="(sym, cellIdx) in area.symbols" 
-                        :key="'sym-' + areaIdx + '-' + cellIdx"
-                        class="symbol-cell"
-                        :class="{ winning: sym.isWinning }"
-                      >
-                        <span class="sym-value">{{ sym.symbol }}</span>
-                      </div>
-                    </div>
-                  </ScratchCanvas>
-                  <div v-else class="symbols-grid">
-                    <div 
-                      v-for="(sym, cellIdx) in area.symbols" 
-                      :key="'sym-' + areaIdx + '-' + cellIdx"
-                      class="symbol-cell"
-                      :class="{ winning: sym.isWinning }"
-                    >
-                      <span class="sym-value">{{ sym.symbol }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
           
@@ -490,7 +449,6 @@ const totalScratchAreas = computed(() => {
   
   let count = 0
   if (lottery.myNumbers) count += 2
-  if (lottery.symbolAreas) count += lottery.symbolAreas.length
   if (lottery.grid) count += 1
   if (lottery.numberAreas) count += lottery.numberAreas.length
   if (lottery.numberArea) count += 1
@@ -530,7 +488,6 @@ const displayPrize = computed(() => {
 function getLotteryPrice(lotteryId: string): number {
   const prices: Record<string, number> = {
     '1': 50,
-    '2': 20,
     '3': 50,
     '4': 5,
     '5': 100,
@@ -619,7 +576,7 @@ function onAreaRevealed(areaId: string) {
   const lottery = currentLottery.value
   if (!lottery) return
   
-  // 好运十倍需要两个区域都刮开后才完全刮开
+  // 点石成金需要两个区域都刮开后才完全刮开
   if (lottery.myNumbers) {
     if (revealedAreas.value.has('winning') && revealedAreas.value.has('mynumbers')) {
       setTimeout(() => {
@@ -827,7 +784,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   margin-bottom: 10px;
 }
 
-/* 好运十倍（符合现实玩法） */
+/* 点石成金（符合现实玩法） */
 .lucky-ten-layout {
   background: linear-gradient(135deg, #fff9e6, #ffefd5);
   border-radius: 16px;
@@ -1049,34 +1006,12 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   color: #8B4513;
 }
 
-/* 点石成金 */
-.symbol-areas {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.symbol-area-item {
-  background: #f9f9f9;
-  border-radius: 10px;
-  padding: 10px;
-}
-
 .area-prize {
   text-align: center;
   font-size: 14px;
   color: #ff6b6b;
   font-weight: bold;
   margin-bottom: 10px;
-}
-
-.symbols-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 10px;
-  background: #fff;
-  border-radius: 8px;
 }
 
 .symbol-cell {
