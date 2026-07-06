@@ -20,75 +20,119 @@
           </div>
           
           <!-- 点石成金 - 数字匹配（符合现实玩法） -->
-          <div v-if="currentLottery.myNumbers" class="game-area">
-            <div class="lucky-ten-layout">
-              <div class="lucky-row winning-row">
-                <div class="lucky-label">中奖号码</div>
-                <div class="scratch-wrapper winning-scratch">
-                  <ScratchCanvas 
-                    v-if="!currentLottery.isScratched"
-                    :brush-size="25"
-                    @revealed="() => onAreaRevealed('winning')"
-                  >
-                    <div class="winning-numbers-row">
-                      <div 
-                        v-for="(num, index) in currentLottery.winningNumbers" 
-                        :key="'win-num-' + index"
-                        class="winning-num-cell"
+          <div v-if="currentLottery.myNumbers" class="game-area dianshi-area">
+            <div class="dianshi-ticket">
+              <div class="dianshi-shine"></div>
+
+              <div class="dianshi-header">
+                <div class="dianshi-price">
+                  <span class="price-value">{{ getLotteryPrice(currentLottery.lotteryId) }}</span>
+                  <span class="price-unit">金币</span>
+                </div>
+              </div>
+
+              <div class="dianshi-title">
+                <span class="title-main">点石成金</span>
+                <span class="title-glow"></span>
+              </div>
+
+              <div class="dianshi-rules">
+                刮开覆盖膜，如果你的任何号码与中奖号码之一相同，即可赢得该号码下方所示的奖金。
+              </div>
+
+              <div class="dianshi-prize-banner">
+                <div class="prize-banner-label">最高奖金</div>
+                <div class="prize-banner-value">{{ formatPrize(getLotteryMaxPrize(currentLottery.lotteryId)) }} 金币</div>
+              </div>
+
+              <div class="dianshi-scratch-zone">
+                <div class="scratch-zone-label">
+                  <span>刮开区</span>
+                  <span class="zone-arrow">▼</span>
+                </div>
+
+                <div class="dianshi-numbers-panel">
+                  <div class="dianshi-section winning-section">
+                    <div class="section-title">中奖号码</div>
+                    <div class="scratch-wrapper dianshi-scratch">
+                      <ScratchCanvas
+                        v-if="!currentLottery.isScratched"
+                        :brush-size="22"
+                        coating-color="#d4a017"
+                        coating-text-color="#fff8dc"
+                        @revealed="() => onAreaRevealed('winning')"
                       >
-                        <span class="win-num-text">{{ num.value }}</span>
+                        <div class="dianshi-win-row">
+                          <div
+                            v-for="(num, index) in currentLottery.winningNumbers"
+                            :key="'win-num-' + index"
+                            class="dianshi-ball winning-ball"
+                          >
+                            <span class="ball-value">{{ num.value }}</span>
+                            <span class="ball-pinyin">{{ numberToPinyin(num.value) }}</span>
+                          </div>
+                        </div>
+                      </ScratchCanvas>
+                      <div v-else class="dianshi-win-row">
+                        <div
+                          v-for="(num, index) in currentLottery.winningNumbers"
+                          :key="'win-num-' + index"
+                          class="dianshi-ball winning-ball"
+                        >
+                          <span class="ball-value">{{ num.value }}</span>
+                          <span class="ball-pinyin">{{ numberToPinyin(num.value) }}</span>
+                        </div>
                       </div>
                     </div>
-                  </ScratchCanvas>
-                  <div v-else class="winning-numbers-row">
-                    <div 
-                      v-for="(num, index) in currentLottery.winningNumbers" 
-                      :key="'win-num-' + index"
-                      class="winning-num-cell"
-                    >
-                      <span class="win-num-text">{{ num.value }}</span>
+                  </div>
+
+                  <div class="dianshi-section my-section">
+                    <div class="section-title">你的号码</div>
+                    <div class="scratch-wrapper dianshi-scratch">
+                      <ScratchCanvas
+                        v-if="!currentLottery.isScratched"
+                        :brush-size="20"
+                        coating-color="#d4a017"
+                        coating-text-color="#fff8dc"
+                        @revealed="() => onAreaRevealed('mynumbers')"
+                      >
+                        <div class="dianshi-my-grid">
+                          <div
+                            v-for="(num, index) in currentLottery.myNumbers"
+                            :key="'num-' + index"
+                            class="dianshi-ball my-ball"
+                            :class="{ winning: selectedMyNumbers.has(index), clickable: num.isWinning }"
+                            @click="handleNumberClick(index)"
+                          >
+                            <span class="ball-value">{{ num.value }}</span>
+                            <span class="ball-pinyin">{{ numberToPinyin(num.value) }}</span>
+                            <span class="ball-prize">{{ formatPrize(num.prize) }}</span>
+                          </div>
+                        </div>
+                      </ScratchCanvas>
+                      <div v-else class="dianshi-my-grid">
+                        <div
+                          v-for="(num, index) in currentLottery.myNumbers"
+                          :key="'num-' + index"
+                          class="dianshi-ball my-ball"
+                          :class="{ winning: selectedMyNumbers.has(index), clickable: num.isWinning }"
+                          @click="handleNumberClick(index)"
+                        >
+                          <span class="ball-value">{{ num.value }}</span>
+                          <span class="ball-pinyin">{{ numberToPinyin(num.value) }}</span>
+                          <span class="ball-prize">{{ formatPrize(num.prize) }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div class="lucky-row">
-                <div class="lucky-label">我的号码</div>
-                <div class="scratch-wrapper">
-                  <ScratchCanvas 
-                    v-if="!currentLottery.isScratched"
-                    :brush-size="25"
-                    @revealed="() => onAreaRevealed('mynumbers')"
-                  >
-                    <div class="my-numbers-grid">
-                      <div
-                        v-for="(num, index) in currentLottery.myNumbers"
-                        :key="'num-' + index"
-                        class="number-cell-with-prize"
-                        :class="{ winning: selectedMyNumbers.has(index) }"
-                        @click="handleNumberClick(index)"
-                      >
-                        <span class="num-value">{{ num.value }}</span>
-                        <span class="num-prize">{{ num.prize }}💰</span>
-                      </div>
-                    </div>
-                  </ScratchCanvas>
-                  <div v-else class="my-numbers-grid">
-                    <div 
-                      v-for="(num, index) in currentLottery.myNumbers" 
-                      :key="'num-' + index"
-                      class="number-cell-with-prize"
-                      :class="{ winning: selectedMyNumbers.has(index) }"
-                      @click="handleNumberClick(index)"
-                    >
-                      <span class="num-value">{{ num.value }}</span>
-                      <span class="num-prize">{{ num.prize }}💰</span>
-                    </div>
-                  </div>
-                </div>
+
+              <div class="dianshi-footer-banner">
+                共有 20 次中奖机会！
               </div>
             </div>
-            
+
             <div class="match-result" v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)">
               <span class="match-count">匹配 {{ selectedMyNumbers.size }} 个号码</span>
               <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
@@ -501,6 +545,25 @@ function getLotteryMaxPrize(lotteryId: string): number {
   return lottery?.maxPrize || 0
 }
 
+function formatPrize(value: number): string {
+  return value.toLocaleString('zh-CN')
+}
+
+const pinyinMap: Record<string, string> = {
+  '01': 'YI', '02': 'ER', '03': 'SAN', '04': 'SI', '05': 'WU',
+  '06': 'LIU', '07': 'QI', '08': 'BA', '09': 'JIU', '10': 'SHI',
+  '11': 'SYI', '12': 'SE2', '13': 'SSA', '14': 'SSI', '15': 'SWU',
+  '16': 'SLI', '17': 'SQI', '18': 'SBA', '19': 'SJI', '20': 'ERSHI',
+  '21': 'EYI', '22': 'EER', '23': 'ESA', '24': 'ESI', '25': 'EWU',
+  '26': 'ELI', '27': 'EQI', '28': 'EBA', '29': 'EJI', '30': 'SANSHI',
+  '31': 'SSY', '32': 'SSE', '33': 'SSS', '34': 'SSI', '35': 'SSW',
+  '36': 'SSL'
+}
+
+function numberToPinyin(num: string): string {
+  return pinyinMap[num] || num
+}
+
 function handleNumberClick(index: number) {
   if (!currentLottery.value?.myNumbers) return
   const num = currentLottery.value.myNumbers[index]
@@ -784,153 +847,295 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   margin-bottom: 10px;
 }
 
-/* 点石成金（符合现实玩法） */
-.lucky-ten-layout {
-  background: linear-gradient(135deg, #fff9e6, #ffefd5);
-  border-radius: 16px;
-  padding: 16px;
-  border: 2px dashed #ffd700;
-  min-width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* 点石成金（参考现实票面优化） */
+.dianshi-area {
+  padding: 10px;
 }
 
-.lucky-row {
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
+.dianshi-ticket {
+  position: relative;
+  background: linear-gradient(180deg, #fff8dc 0%, #ffe866 30%, #ffd700 60%, #ffb700 100%);
+  border-radius: 18px;
+  padding: 16px 12px 14px;
+  color: #5a3d00;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 3px #b8860b,
+    inset 0 0 0 6px #ffd700,
+    0 8px 28px rgba(139, 69, 19, 0.28);
 }
 
-.lucky-label {
-  flex-shrink: 0;
-  width: 32px;
-  font-size: 15px;
+.dianshi-ticket::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px dashed rgba(184, 134, 11, 0.5);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.dianshi-shine {
+  position: absolute;
+  top: -40%;
+  left: -40%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, transparent 60%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.dianshi-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 10px;
+}
+
+.dianshi-price {
+  background: linear-gradient(135deg, #8b0000, #c90010);
+  color: #ffd700;
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 2px solid #ffd700;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.price-value {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.price-unit {
+  font-size: 11px;
   font-weight: bold;
-  color: #8B4513;
+}
+
+.dianshi-title {
   text-align: center;
-  writing-mode: vertical-rl;
-  letter-spacing: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 215, 0, 0.15);
-  border-radius: 8px;
-  padding: 8px 0;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 6px;
 }
 
-.winning-numbers-row {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 10px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+.title-main {
+  display: block;
+  font-size: 42px;
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 6px;
+  text-shadow:
+    0 0 0 #8b0000,
+    2px 2px 0 #8b0000,
+    -1px -1px 0 #8b0000,
+    0 0 16px rgba(255, 215, 0, 0.7);
+  line-height: 1.1;
 }
 
-.winning-num-cell {
-  flex: 1;
-  min-width: 44px;
-  min-height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
+.dianshi-rules {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #7a5200;
+  text-align: center;
+  padding: 0 10px;
+  margin-bottom: 8px;
+}
+
+.dianshi-prize-banner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, transparent, rgba(139, 0, 0, 0.08), transparent);
+  padding: 6px 0;
+}
+
+.prize-banner-label {
+  font-size: 12px;
+  color: #8b0000;
   font-weight: bold;
-  color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  margin-bottom: 2px;
 }
 
-.win-num-text {
-  font-weight: bold;
+.prize-banner-value {
+  font-size: 22px;
+  font-weight: 900;
+  color: #8b0000;
+  text-shadow: 1px 1px 0 rgba(255, 215, 0, 0.6);
 }
 
-.winning-row {
+.dianshi-scratch-zone {
+  position: relative;
+  z-index: 1;
+  display: flex;
   align-items: stretch;
-}
-
-.winning-scratch {
-  max-height: 92px;
-}
-
-.winning-scratch .winning-numbers-row {
-  min-height: 72px;
-}
-
-.my-numbers-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(44px, 1fr));
   gap: 6px;
-  padding: 10px;
-  background: #fff;
+  background: linear-gradient(135deg, #fff8dc, #ffe866);
+  border: 2px solid #d4a017;
+  border-radius: 14px;
+  padding: 8px 6px;
+  margin-bottom: 10px;
+}
+
+.scratch-zone-label {
+  flex-shrink: 0;
+  width: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  background: linear-gradient(180deg, #b8860b, #8b6914);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 8px 2px;
+  writing-mode: vertical-rl;
+  letter-spacing: 2px;
+  line-height: 1.1;
+}
+
+.zone-arrow {
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+.dianshi-numbers-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dianshi-section {
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.my-numbers-grid.small {
+.section-title {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #8b0000;
+  margin-bottom: 6px;
+  letter-spacing: 3px;
+}
+
+.dianshi-scratch {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.dianshi-scratch .scratch-canvas-container {
+  display: block;
+  width: 100%;
+}
+
+.dianshi-win-row {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 6px;
+  padding: 8px 6px;
+  background: linear-gradient(135deg, #fff9e6, #ffefd5);
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dianshi-my-grid {
+  display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
+  gap: 5px;
+  padding: 8px 6px;
+  background: linear-gradient(135deg, #fff9e6, #ffefd5);
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.number-cell-with-prize {
-  min-width: 44px;
-  min-height: 72px;
+.dianshi-ball {
+  aspect-ratio: 1.15;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-weight: bold;
-  color: #333;
-  padding: 4px 2px;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  background: linear-gradient(180deg, #fffef5 0%, #fff8dc 50%, #ffecb3 100%);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 -2px 4px rgba(184, 134, 11, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  padding: 2px;
+  transition: transform 0.12s, box-shadow 0.2s;
+  min-width: 0;
   overflow: hidden;
 }
 
-.number-cell-with-prize:active {
+.dianshi-ball.clickable {
+  cursor: pointer;
+}
+
+.dianshi-ball.clickable:active {
   transform: scale(0.95);
 }
 
-.number-cell-with-prize.winning {
-  background: linear-gradient(135deg, #ffd700, #ffb700);
-  border-color: #ff9800;
-  color: #8B4513;
+.dianshi-ball.winning {
+  background: linear-gradient(180deg, #fff5a0 0%, #ffd700 50%, #ffb347 100%);
+  box-shadow:
+    inset 0 -2px 4px rgba(139, 0, 0, 0.15),
+    0 0 12px rgba(255, 140, 0, 0.5);
   animation: pulse 1s infinite;
-  box-shadow: 0 0 16px rgba(255, 152, 0, 0.5);
 }
 
-.num-value {
-  font-size: 16px;
-  font-weight: bold;
-  line-height: 1.2;
+.ball-value {
+  font-size: 14px;
+  font-weight: 900;
+  color: #8b0000;
+  line-height: 1.1;
 }
 
-.num-prize {
-  font-size: 10px;
-  margin-top: 4px;
-  color: #ff6b6b;
+.ball-pinyin {
+  font-size: 7px;
+  color: #b8860b;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1px;
-  line-height: 1.2;
-  text-align: center;
-  max-width: 100%;
+  line-height: 1.1;
+  margin-top: 1px;
+  letter-spacing: 0;
+  transform: scale(0.9);
 }
 
-.number-cell-with-prize.winning .num-prize {
-  color: #8B4513;
+.ball-prize {
+  font-size: 8px;
+  color: #c90010;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: 1px;
+}
+
+.dianshi-ball.winning .ball-prize {
+  color: #8b0000;
+}
+
+.dianshi-footer-banner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #8b0000;
+  text-shadow: 1px 1px 0 rgba(255, 215, 0, 0.6);
+  margin-bottom: 8px;
 }
 
 .match-result {
@@ -1142,6 +1347,28 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   color: #4ECDC4;
   margin-bottom: 10px;
   text-align: center;
+}
+
+.my-numbers-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(44px, 1fr));
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.my-numbers-grid.small {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.num-value {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.2;
 }
 
 .bonus-symbols {
