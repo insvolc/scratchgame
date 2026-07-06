@@ -337,7 +337,7 @@
           <div v-if="currentLottery.xiXiangFengCells" class="game-area">
             <div class="area-title">囍 喜相逢</div>
             <div class="xi-xiangfeng-hint">
-              <span>“喜”得对应奖金，“囍”得两倍奖金，兼中兼得</span>
+              <span>刮开后点击“喜”或“囍”图符领取奖金，“囍”可得两倍</span>
             </div>
             <div class="scratch-wrapper xi-xiangfeng-scratch">
               <ScratchCanvas
@@ -528,16 +528,20 @@ function handleXiCellClick(rowIdx: number, colIdx: number) {
   if (!currentLottery.value?.xiXiangFengCells) return
   const cell = currentLottery.value.xiXiangFengCells[rowIdx]?.[colIdx]
   if (!cell || !cell.isWinning) return
-  
+
   const key = `${rowIdx}-${colIdx}`
   const next = new Set(selectedXiCells.value)
   if (!next.has(key)) {
     next.add(key)
     selectedXiCells.value = next
-    
+
     const prize = cell.basePrize * cell.multiplier
     if (prize > 0) {
       claimedPrize.value += prize
+      if (currentLottery.value) {
+        currentLottery.value.claimedXiCells = Array.from(next)
+        currentLottery.value.claimedPrize = claimedPrize.value
+      }
       gameStore.addCoins(prize)
       showResultAnimation.value = true
       setTimeout(() => {
@@ -633,20 +637,21 @@ function goToNext() {
   }
 }
 
-onMounted(() => {
+function resetScratchState() {
   showResultAnimation.value = false
   hasClickedWinningNumber.value = false
-  claimedPrize.value = 0
-  selectedXiCells.value.clear()
+  claimedPrize.value = currentLottery.value?.claimedPrize ?? 0
+  selectedMyNumbers.value.clear()
+  selectedXiCells.value = new Set(currentLottery.value?.claimedXiCells ?? [])
+  revealedAreas.value.clear()
+}
+
+onMounted(() => {
+  resetScratchState()
 })
 
 watch(() => currentLottery.value?.id, () => {
-  showResultAnimation.value = false
-  selectedMyNumbers.value.clear()
-  selectedXiCells.value.clear()
-  revealedAreas.value.clear()
-  hasClickedWinningNumber.value = false
-  claimedPrize.value = 0
+  resetScratchState()
 })
 
 watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {

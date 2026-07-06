@@ -34,11 +34,13 @@ export interface BackpackItem {
   symbolArea?: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> }
   bonusPrizes?: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
   xiXiangFengCells?: Array<Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }>>
+  claimedXiCells?: string[]
+  claimedPrize?: number
 }
 
 export interface GameState {
   coins: number
-  lotteries: Lottery[]
+  lotteries?: Lottery[]
   backpack: BackpackItem[]
   currentView: 'home' | 'shop' | 'backpack' | 'scratch'
   currentLottery: BackpackItem | null

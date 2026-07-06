@@ -488,7 +488,7 @@ export const useGameStore = defineStore('game', () => {
   const coins = ref(saved.coins ?? 100)
   const backpack = ref<BackpackItem[]>(saved.backpack ?? [])
   const currentView = ref<'home' | 'shop' | 'backpack' | 'scratch'>(saved.currentView ?? 'home')
-  const currentLottery = ref<BackpackItem | null>(null)
+  const currentLottery = ref<BackpackItem | null>(saved.currentLottery ?? null)
   
   const unscratchedCount = computed(() => 
     backpack.value.filter(item => !item.isScratched).length
@@ -560,9 +560,10 @@ export const useGameStore = defineStore('game', () => {
       isScratched: false,
       prize,
       result,
+      ...(lottery.playType === 'xiXiangFeng' ? { claimedXiCells: [], claimedPrize: 0 } : {}),
       ...content
     } as BackpackItem)
-    
+
     saveState()
     return true
   }
