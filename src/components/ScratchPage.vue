@@ -358,7 +358,12 @@
                       ref="xiScratchCanvasRef"
                       :brush-size="22"
                       coating-color="#e60012"
-                      coating-text-color="#ffd700"
+                      coating-text-color="#ffffff"
+                      coating-pattern="xi"
+                      pattern-color="rgba(255, 215, 0, 0.35)"
+                      pattern-symbol="囍"
+                      :pattern-rows="5"
+                      :pattern-cols="5"
                       @revealed="() => onAreaRevealed('xixiangfeng')"
                     >
                       <div class="xi-xiangfeng-grid">

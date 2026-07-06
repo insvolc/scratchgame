@@ -33,6 +33,11 @@ const props = defineProps<{
   revealThreshold?: number
   coatingColor?: string
   coatingTextColor?: string
+  coatingPattern?: 'none' | 'xi'
+  patternColor?: string
+  patternSymbol?: string
+  patternRows?: number
+  patternCols?: number
 }>()
 
 const emit = defineEmits<{
@@ -170,15 +175,58 @@ function initCanvas() {
       ctx.fillStyle = props.coatingColor || '#c0c0c0'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      // 涂层提示图案
+      if (props.coatingPattern === 'xi') {
+        drawCoatingPattern(ctx, canvas.width, canvas.height)
+      }
+
       ctx.fillStyle = props.coatingTextColor || '#a0a0a0'
       ctx.font = 'bold 24px Arial'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)'
+      ctx.shadowBlur = 4
       ctx.fillText('刮开此处', canvas.width / 2, canvas.height / 2 - 15)
       ctx.font = '14px Arial'
       ctx.fillText('Scratch Here', canvas.width / 2, canvas.height / 2 + 15)
+      ctx.shadowColor = 'transparent'
+      ctx.shadowBlur = 0
     })
   })
+}
+
+function drawCoatingPattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  const rows = props.patternRows ?? 5
+  const cols = props.patternCols ?? 5
+  if (rows <= 0 || cols <= 0) return
+
+  const color = props.patternColor || 'rgba(255, 255, 255, 0.22)'
+  const symbol = props.patternSymbol || '囍'
+  const paddingX = width * 0.03
+  const paddingY = height * 0.03
+  const cellW = (width - paddingX * 2) / cols
+  const cellH = (height - paddingY * 2) / rows
+  const radius = Math.min(cellW, cellH) * 0.40
+
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.fillStyle = color
+  ctx.lineWidth = Math.max(1, width * 0.003)
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.font = `bold ${Math.floor(radius * 1.1)}px Arial`
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx = paddingX + cellW * c + cellW / 2
+      const cy = paddingY + cellH * r + cellH / 2
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.fillText(symbol, cx, cy)
+    }
+  }
+  ctx.restore()
 }
 
 function reset() {
