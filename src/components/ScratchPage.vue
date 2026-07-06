@@ -334,55 +334,89 @@
           </div>
           
           <!-- 喜相逢 - 5×5 图符型 -->
-          <div v-if="currentLottery.xiXiangFengCells" class="game-area">
-            <div class="area-title">囍 喜相逢</div>
-            <div class="xi-xiangfeng-hint">
-              <span>刮开后点击“喜”或“囍”图符领取奖金，“囍”可得两倍</span>
-            </div>
-            <div class="scratch-wrapper xi-xiangfeng-scratch">
-              <ScratchCanvas
-                v-if="!currentLottery.isScratched"
-                :brush-size="22"
-                @revealed="() => onAreaRevealed('xixiangfeng')"
-              >
-                <div class="xi-xiangfeng-grid">
-                  <div
-                    v-for="(row, rowIdx) in currentLottery.xiXiangFengCells"
-                    :key="'xirow-' + rowIdx"
-                    class="xi-xiangfeng-row"
-                  >
-                    <div
-                      v-for="(cell, colIdx) in row"
-                      :key="'xicell-' + rowIdx + '-' + colIdx"
-                      class="xi-xiangfeng-cell"
-                      :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
-                      @click="handleXiCellClick(rowIdx, colIdx)"
+          <div v-if="currentLottery.xiXiangFengCells" class="game-area xi-xiangfeng-area">
+            <div class="xi-xiangfeng-ticket">
+              <div class="ticket-clouds ticket-clouds-top"></div>
+
+              <div class="ticket-header">
+                <div class="ticket-main-title">喜相逢</div>
+                <div class="ticket-subtitle">财运亨通</div>
+              </div>
+
+              <div class="ticket-prize-banner">
+                <span class="prize-label">最高奖金</span>
+                <span class="prize-value">{{ getLotteryMaxPrize(currentLottery.lotteryId) }}</span>
+                <span class="prize-unit">金币</span>
+              </div>
+
+              <div class="ticket-body">
+                <div class="side-banner left">鹏程万里</div>
+                <div class="ticket-grid-wrapper">
+                  <div class="scratch-wrapper xi-xiangfeng-scratch">
+                    <ScratchCanvas
+                      v-if="!currentLottery.isScratched"
+                      ref="xiScratchCanvasRef"
+                      :brush-size="22"
+                      coating-color="#e60012"
+                      coating-text-color="#ffd700"
+                      @revealed="() => onAreaRevealed('xixiangfeng')"
                     >
-                      <span class="xi-symbol">{{ cell.symbol }}</span>
-                      <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
+                      <div class="xi-xiangfeng-grid">
+                        <div
+                          v-for="(row, rowIdx) in currentLottery.xiXiangFengCells"
+                          :key="'xirow-' + rowIdx"
+                          class="xi-xiangfeng-row"
+                        >
+                          <div
+                            v-for="(cell, colIdx) in row"
+                            :key="'xicell-' + rowIdx + '-' + colIdx"
+                            class="xi-xiangfeng-cell"
+                            :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
+                            @click="handleXiCellClick(rowIdx, colIdx)"
+                          >
+                            <span class="xi-symbol">{{ cell.symbol }}</span>
+                            <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </ScratchCanvas>
+                    <div v-else class="xi-xiangfeng-grid">
+                      <div
+                        v-for="(row, rowIdx) in currentLottery.xiXiangFengCells"
+                        :key="'xirow-' + rowIdx"
+                        class="xi-xiangfeng-row"
+                      >
+                        <div
+                          v-for="(cell, colIdx) in row"
+                          :key="'xicell-' + rowIdx + '-' + colIdx"
+                          class="xi-xiangfeng-cell"
+                          :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
+                          @click="handleXiCellClick(rowIdx, colIdx)"
+                        >
+                          <span class="xi-symbol">{{ cell.symbol }}</span>
+                          <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </ScratchCanvas>
-              <div v-else class="xi-xiangfeng-grid">
-                <div
-                  v-for="(row, rowIdx) in currentLottery.xiXiangFengCells"
-                  :key="'xirow-' + rowIdx"
-                  class="xi-xiangfeng-row"
-                >
-                  <div
-                    v-for="(cell, colIdx) in row"
-                    :key="'xicell-' + rowIdx + '-' + colIdx"
-                    class="xi-xiangfeng-cell"
-                    :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
-                    @click="handleXiCellClick(rowIdx, colIdx)"
-                  >
-                    <span class="xi-symbol">{{ cell.symbol }}</span>
-                    <span class="xi-prize">{{ cell.basePrize * cell.multiplier }}</span>
-                  </div>
-                </div>
+                <div class="side-banner right">鸿运千秋</div>
+              </div>
+
+              <div class="ticket-footer">
+                <div class="ticket-footer-banner">金玉满堂</div>
+                <div class="ticket-chance">25次中奖机会</div>
+              </div>
+
+              <div class="ticket-security">
+                <span>保安区刮开无效</span>
               </div>
             </div>
+
+            <div class="xi-xiangfeng-hint">
+              <span>刮开后点击“喜”或“囍”图符领取奖金，“囍”可得两倍</span>
+            </div>
+
             <div class="match-result" v-if="currentLottery.isScratched && currentLottery.xiXiangFengCells">
               <span class="match-count">已领取 {{ selectedXiCells.size }} 个中奖图符</span>
               <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
@@ -440,6 +474,7 @@ const showResultAnimation = ref(false)
 const selectedMyNumbers = ref<Set<number>>(new Set())
 const selectedXiCells = ref<Set<string>>(new Set())
 const scratchCanvasRefs = ref<Map<string, InstanceType<typeof ScratchCanvas>>>(new Map())
+const xiScratchCanvasRef = ref<InstanceType<typeof ScratchCanvas> | null>(null)
 const revealedAreas = ref<Set<string>>(new Set())
 const hasClickedWinningNumber = ref(false)
 const claimedPrize = ref(0)
@@ -499,7 +534,10 @@ function getLotteryPrice(lotteryId: string): number {
   return prices[lotteryId] || 0
 }
 
-
+function getLotteryMaxPrize(lotteryId: string): number {
+  const lottery = gameStore.lotteries.find(l => l.id === lotteryId)
+  return lottery?.maxPrize || 0
+}
 
 function handleNumberClick(index: number) {
   if (!currentLottery.value?.myNumbers) return
@@ -600,8 +638,9 @@ function onRevealed() {
 
 function revealAll() {
   if (currentLottery.value) {
+    xiScratchCanvasRef.value?.revealAll()
     gameStore.scratchLottery(currentLottery.value.id)
-    
+
     if (currentLottery.value.myNumbers && currentLottery.value.prize && currentLottery.value.prize > 0) {
       const remainingPrize = currentLottery.value.prize - claimedPrize.value
       if (remainingPrize > 0) {
@@ -1201,33 +1240,168 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 /* 喜相逢 */
-.xi-xiangfeng-hint {
+.xi-xiangfeng-area {
+  padding: 10px;
+}
+
+.xi-xiangfeng-ticket {
+  position: relative;
+  background: linear-gradient(180deg, #e60012 0%, #c90010 100%);
+  border-radius: 18px;
+  padding: 18px 10px 14px;
+  color: #fff;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 3px #0047ab,
+    inset 0 0 0 5px #ffd700,
+    0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.xi-xiangfeng-ticket::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px dashed rgba(255, 215, 0, 0.55);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.ticket-clouds {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background-repeat: repeat-x;
+  background-size: 28px 28px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.ticket-clouds-top {
+  top: 0;
+  background-image: radial-gradient(circle at 50% 100%, transparent 10px, #0047ab 11px, #0047ab 14px, transparent 15px);
+}
+
+.ticket-header {
   text-align: center;
-  font-size: 12px;
-  color: #888;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.ticket-main-title {
+  font-size: 44px;
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 10px;
+  text-shadow:
+    0 0 0 #8b0000,
+    2px 2px 0 #8b0000,
+    0 0 12px rgba(255, 215, 0, 0.5);
+  line-height: 1.1;
+}
+
+.ticket-subtitle {
+  display: inline-block;
+  background: #0047ab;
+  color: #ffd700;
+  padding: 4px 28px;
+  border-radius: 20px;
+  border: 2px solid #ffd700;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  margin-top: 6px;
+}
+
+.ticket-prize-banner {
+  text-align: center;
   margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.ticket-prize-banner .prize-label {
+  color: #ffd700;
+  font-size: 13px;
+  margin-right: 4px;
+}
+
+.ticket-prize-banner .prize-value {
+  color: #ffd700;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.ticket-prize-banner .prize-unit {
+  color: #ffd700;
+  font-size: 12px;
+  margin-left: 2px;
+}
+
+.ticket-body {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.side-banner {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  background: #0047ab;
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  padding: 10px 2px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.ticket-grid-wrapper {
+  flex: 1;
+  background: #e60012;
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.xi-xiangfeng-scratch {
+  margin-bottom: 0;
 }
 
 .xi-xiangfeng-scratch .scratch-canvas-container {
   display: block;
   width: 100%;
+  border-radius: 0;
 }
 
 .xi-xiangfeng-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #fff5f5, #fff0f0);
-  border-radius: 12px;
+  padding: 0;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  border-radius: 0;
   box-sizing: border-box;
 }
 
 .xi-xiangfeng-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: 4px;
   width: 100%;
 }
 
@@ -1237,40 +1411,100 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 2px solid #e0e0e0;
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 8px;
   font-weight: bold;
   color: #222;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.xi-xiangfeng-cell:active {
+  transform: scale(0.95);
 }
 
 .xi-xiangfeng-cell.winning {
-  background: linear-gradient(135deg, #ff6b6b, #ffd700);
-  border-color: #ff6b6b;
-  color: #8B4513;
+  background: radial-gradient(circle at 30% 30%, #fff5a0, #ffd700 60%, #ffb700);
+  border-color: #b8860b;
+  color: #8b0000;
   animation: pulse 1s infinite;
 }
 
 .xi-xiangfeng-cell.double {
-  border-color: #ff1744;
-  box-shadow: 0 0 12px rgba(255, 23, 68, 0.3);
+  border-color: #b8860b;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.xi-xiangfeng-cell.winning.double {
+  background: radial-gradient(circle at 30% 30%, #fff, #ffd700 50%, #ff8a00);
 }
 
 .xi-symbol {
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.1;
+  color: #1a1a1a;
 }
 
 .xi-xiangfeng-cell.winning .xi-symbol {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+  color: #8b0000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .xi-prize {
-  font-size: 10px;
-  margin-top: 1px;
+  font-size: 11px;
+  margin-top: 2px;
+  font-weight: 800;
+  color: #333;
+}
+
+.ticket-footer {
+  margin-top: 12px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.ticket-footer-banner {
+  display: inline-block;
+  background: #0047ab;
+  color: #ffd700;
+  padding: 5px 32px;
+  border-radius: 20px;
+  border: 2px solid #ffd700;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 4px;
+}
+
+.ticket-chance {
+  color: #ffd700;
+  font-size: 11px;
+  margin-top: 6px;
+  font-weight: bold;
+}
+
+.ticket-security {
+  margin-top: 10px;
+  background: #0047ab;
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.xi-xiangfeng-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin-top: 12px;
 }
 
 /* 通用 */

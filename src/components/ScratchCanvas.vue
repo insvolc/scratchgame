@@ -31,6 +31,8 @@ const props = defineProps<{
   height?: number
   brushSize?: number
   revealThreshold?: number
+  coatingColor?: string
+  coatingTextColor?: string
 }>()
 
 const emit = defineEmits<{
@@ -165,10 +167,10 @@ function initCanvas() {
       const ctx = canvas.getContext('2d')
       if (!ctx) return
       
-      ctx.fillStyle = '#c0c0c0'
+      ctx.fillStyle = props.coatingColor || '#c0c0c0'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
-      ctx.fillStyle = '#a0a0a0'
+
+      ctx.fillStyle = props.coatingTextColor || '#a0a0a0'
       ctx.font = 'bold 24px Arial'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
