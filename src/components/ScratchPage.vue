@@ -416,9 +416,6 @@
                 <div class="ticket-chance">25次中奖机会</div>
               </div>
 
-              <div class="ticket-security">
-                <span>保安区刮开无效</span>
-              </div>
             </div>
 
             <div class="xi-xiangfeng-hint">
@@ -527,9 +524,6 @@
                 最高奖金 100 万元
               </div>
 
-              <div class="lucky-double-security">
-                <span>保安区刮开无效</span>
-              </div>
             </div>
 
             <div class="lucky-double-hint">
