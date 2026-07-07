@@ -30,12 +30,14 @@
           <span class="btn-icon">🛒</span>
           <span class="btn-text">购买彩票</span>
         </button>
-        
-        <button class="action-btn backpack-btn" @click="goToBackpack">
-          <span class="btn-icon">🎒</span>
-          <span class="btn-text">我的背包</span>
+
+        <div class="btn-wrapper">
+          <button class="action-btn backpack-btn" @click="goToBackpack">
+            <span class="btn-icon">🎒</span>
+            <span class="btn-text">我的背包</span>
+          </button>
           <span v-if="unscratchedCount > 0" class="badge">{{ unscratchedCount }}</span>
-        </button>
+        </div>
       </div>
       
       <button class="refresh-btn" @click="refreshGame">
@@ -203,10 +205,16 @@ function addCoinsDebug() {
   padding-top: 12px;
 }
 
+.btn-wrapper {
+  position: relative;
+  display: flex;
+}
+
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   padding: 20px;
   border: none;
   border-radius: 16px;
@@ -270,17 +278,17 @@ function addCoinsDebug() {
 
 .badge {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: -8px;
+  right: -8px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #fff;
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   border: 2px solid rgba(255, 255, 255, 0.6);
