@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Lottery, BackpackItem, LotteryResult, GameState } from '@/types'
+import type { Lottery, BackpackItem, LotteryResult, GameState, Achievement, AchievementDefinition, GameStats } from '@/types'
 
 const STORAGE_KEY = 'scratch_game_data'
 
@@ -534,6 +534,68 @@ function determinePrize(lotteryId: string): { result: LotteryResult; prize: numb
   return { result: 'none', prize: 0 }
 }
 
+const achievementDefinitions: AchievementDefinition[] = [
+  {
+    id: 'first_purchase',
+    name: '初试身手',
+    description: '第一次购买彩票',
+    icon: '🎫',
+    check: stats => stats.totalPurchased >= 1
+  },
+  {
+    id: 'first_win',
+    name: '开门红',
+    description: '第一次中奖',
+    icon: '🎉',
+    check: stats => stats.totalWins >= 1
+  },
+  {
+    id: 'win_streak_10',
+    name: '中奖达人',
+    description: '累计中奖 10 次',
+    icon: '🔥',
+    check: stats => stats.totalWins >= 10
+  },
+  {
+    id: 'big_win',
+    name: '大奖猎手',
+    description: '单次中奖金额达到 500 金币',
+    icon: '💎',
+    check: stats => stats.maxSingleWin >= 500
+  },
+  {
+    id: 'grand_master',
+    name: '至尊锦鲤',
+    description: '中过一次特等奖',
+    icon: '👑',
+    check: stats => stats.grandPrizeCount >= 1
+  },
+  {
+    id: 'veteran_50',
+    name: '刮奖老手',
+    description: '累计刮开 50 张彩票',
+    icon: '🏆',
+    check: stats => stats.totalScratched >= 50
+  },
+  {
+    id: 'wealth_king',
+    name: '财富王者',
+    description: '金币数量达到 10000',
+    icon: '💰',
+    check: stats => stats.peakCoins >= 10000
+  }
+]
+
+function createDefaultAchievements(): Achievement[] {
+  return achievementDefinitions.map(def => ({
+    id: def.id,
+    name: def.name,
+    description: def.description,
+    icon: def.icon,
+    unlocked: false
+  }))
+}
+
 function generateLotteryContent(lottery: Lottery): Record<string, unknown> {
   switch (lottery.playType) {
     case 'numberMatch':
@@ -557,12 +619,22 @@ function loadFromStorage(): Partial<GameState> {
   try {
     const data = localStorage.getItem(STORAGE_KEY)
     if (data) {
-      return JSON.parse(data)
+      const parsed = JSON.parse(data) as Partial<GameState>
+      if (!parsed.achievements || parsed.achievements.length !== achievementDefinitions.length) {
+        parsed.achievements = createDefaultAchievements()
+      }
+      if (!parsed.achievementNotifications) {
+        parsed.achievementNotifications = []
+      }
+      return parsed
     }
   } catch {
     console.error('Failed to load game data')
   }
-  return {}
+  return {
+    achievements: createDefaultAchievements(),
+    achievementNotifications: []
+  }
 }
 
 function saveToStorage(state: GameState): void {
@@ -575,12 +647,15 @@ function saveToStorage(state: GameState): void {
 
 export const useGameStore = defineStore('game', () => {
   const saved = loadFromStorage()
-  
+
   const coins = ref(saved.coins ?? 100)
   const backpack = ref<BackpackItem[]>(saved.backpack ?? [])
-  const currentView = ref<'home' | 'shop' | 'backpack' | 'scratch'>(saved.currentView ?? 'home')
+  const currentView = ref<'home' | 'shop' | 'backpack' | 'scratch' | 'achievements'>(saved.currentView ?? 'home')
   const currentLottery = ref<BackpackItem | null>(saved.currentLottery ?? null)
-  
+  const achievements = ref<Achievement[]>(saved.achievements ?? createDefaultAchievements())
+  const achievementNotifications = ref<Achievement[]>(saved.achievementNotifications ?? [])
+  const peakCoins = ref(saved.peakCoins ?? coins.value)
+
   const unscratchedCount = computed(() => 
     backpack.value.filter(item => !item.isScratched).length
   )
@@ -589,11 +664,57 @@ export const useGameStore = defineStore('game', () => {
     backpack.value.filter(item => item.isScratched && item.prize).reduce((sum, item) => sum + (item.prize || 0), 0)
   )
   
-  function setView(view: 'home' | 'shop' | 'backpack' | 'scratch') {
+  function setView(view: 'home' | 'shop' | 'backpack' | 'scratch' | 'achievements') {
     currentView.value = view
     saveState()
   }
-  
+
+  function computeStats(): GameStats {
+    const scratched = backpack.value.filter(item => item.isScratched)
+    const wins = scratched.filter(item => (item.prize || 0) > 0)
+    const totalEarned = wins.reduce((sum, item) => sum + (item.prize || 0), 0)
+    const maxSingleWin = wins.reduce((max, item) => Math.max(max, item.prize || 0), 0)
+
+    return {
+      totalScratched: scratched.length,
+      totalWins: wins.length,
+      totalEarned,
+      maxSingleWin,
+      grandPrizeCount: wins.filter(item => item.result === 'grand').length,
+      firstPrizeCount: wins.filter(item => item.result === 'first').length,
+      peakCoins: peakCoins.value,
+      totalPurchased: backpack.value.length
+    }
+  }
+
+  function checkAchievements() {
+    const stats = computeStats()
+    const newlyUnlocked: Achievement[] = []
+
+    for (const def of achievementDefinitions) {
+      const existing = achievements.value.find(a => a.id === def.id)
+      if (!existing || existing.unlocked) continue
+
+      if (def.check(stats)) {
+        existing.unlocked = true
+        existing.unlockedAt = Date.now()
+        newlyUnlocked.push({ ...existing })
+      }
+    }
+
+    if (newlyUnlocked.length > 0) {
+      achievementNotifications.value.push(...newlyUnlocked)
+      saveState()
+    }
+  }
+
+  function clearAchievementNotifications() {
+    achievementNotifications.value = []
+    saveState()
+  }
+
+  checkAchievements()
+
   function calculatePrizeFromContent(lotteryId: string, content: Record<string, unknown>): { result: LotteryResult; prize: number } {
     if (lotteryId === '1' && content.myNumbers) {
       const myNumbers = content.myNumbers as Array<{ value: string; prize: number; isWinning: boolean }>
@@ -672,6 +793,7 @@ export const useGameStore = defineStore('game', () => {
       ...content
     } as BackpackItem)
 
+    checkAchievements()
     saveState()
     return true
   }
@@ -775,6 +897,7 @@ export const useGameStore = defineStore('game', () => {
       }))
     }
 
+    checkAchievements()
     saveState()
   }
   
@@ -858,12 +981,19 @@ export const useGameStore = defineStore('game', () => {
   
   function refreshCoins() {
     coins.value = 100
+    peakCoins.value = 100
     backpack.value = []
+    achievements.value = createDefaultAchievements()
+    achievementNotifications.value = []
     saveState()
   }
   
   function addCoins(amount: number) {
     coins.value += amount
+    if (coins.value > peakCoins.value) {
+      peakCoins.value = coins.value
+    }
+    checkAchievements()
     saveState()
   }
   
@@ -872,7 +1002,10 @@ export const useGameStore = defineStore('game', () => {
       coins: coins.value,
       backpack: backpack.value,
       currentView: currentView.value,
-      currentLottery: currentLottery.value
+      currentLottery: currentLottery.value,
+      achievements: achievements.value,
+      achievementNotifications: achievementNotifications.value,
+      peakCoins: peakCoins.value
     })
   }
   
@@ -882,6 +1015,9 @@ export const useGameStore = defineStore('game', () => {
     backpack,
     currentView,
     currentLottery,
+    achievements,
+    achievementNotifications,
+    peakCoins,
     unscratchedCount,
     totalWon,
     setView,
@@ -892,6 +1028,8 @@ export const useGameStore = defineStore('game', () => {
     removeLottery,
     clearScratched,
     refreshCoins,
-    addCoins
+    addCoins,
+    clearAchievementNotifications,
+    achievementDefinitions
   }
 })

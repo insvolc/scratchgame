@@ -1,5 +1,33 @@
 export type LotteryResult = 'grand' | 'first' | 'second' | 'third' | 'fourth' | 'none'
 
+export interface Achievement {
+  id: string
+  name: string
+  description: string
+  icon: string
+  unlocked: boolean
+  unlockedAt?: number
+}
+
+export interface AchievementDefinition {
+  id: string
+  name: string
+  description: string
+  icon: string
+  check: (stats: GameStats) => boolean
+}
+
+export interface GameStats {
+  totalScratched: number
+  totalWins: number
+  totalEarned: number
+  maxSingleWin: number
+  grandPrizeCount: number
+  firstPrizeCount: number
+  peakCoins: number
+  totalPurchased: number
+}
+
 export interface Lottery {
   id: string
   name: string
@@ -49,6 +77,9 @@ export interface GameState {
   coins: number
   lotteries?: Lottery[]
   backpack: BackpackItem[]
-  currentView: 'home' | 'shop' | 'backpack' | 'scratch'
+  currentView: 'home' | 'shop' | 'backpack' | 'scratch' | 'achievements'
   currentLottery: BackpackItem | null
+  achievements: Achievement[]
+  achievementNotifications: Achievement[]
+  peakCoins: number
 }

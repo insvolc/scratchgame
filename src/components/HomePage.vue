@@ -26,17 +26,25 @@
       </div>
       
       <div class="buttons-section">
-        <button class="action-btn shop-btn" @click="goToShop">
-          <span class="btn-icon">🛒</span>
-          <span class="btn-text">购买彩票</span>
-        </button>
-
         <div class="btn-wrapper">
           <button class="action-btn backpack-btn" @click="goToBackpack">
             <span class="btn-icon">🎒</span>
             <span class="btn-text">我的背包</span>
           </button>
           <span v-if="unscratchedCount > 0" class="badge">{{ unscratchedCount }}</span>
+        </div>
+
+        <button class="action-btn shop-btn" @click="goToShop">
+          <span class="btn-icon">🛒</span>
+          <span class="btn-text">购买彩票</span>
+        </button>
+
+        <div class="btn-wrapper">
+          <button class="action-btn achievements-btn" @click="goToAchievements">
+            <span class="btn-icon">🏆</span>
+            <span class="btn-text">成就勋章</span>
+          </button>
+          <span v-if="unlockedAchievementCount > 0" class="badge achievement-badge">{{ unlockedAchievementCount }}</span>
         </div>
       </div>
       
@@ -55,12 +63,14 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { useGameStore } from '@/stores/game'
 
 const gameStore = useGameStore()
-const { coins } = storeToRefs(gameStore)
+const { coins, achievements } = storeToRefs(gameStore)
 const unscratchedCount = gameStore.unscratchedCount
 const totalWon = gameStore.totalWon
+const unlockedAchievementCount = computed(() => achievements.value.filter(a => a.unlocked).length)
 
 function goToShop() {
   gameStore.setView('shop')
@@ -68,6 +78,10 @@ function goToShop() {
 
 function goToBackpack() {
   gameStore.setView('backpack')
+}
+
+function goToAchievements() {
+  gameStore.setView('achievements')
 }
 
 function refreshGame() {
@@ -260,6 +274,20 @@ function addCoinsDebug() {
 
 .backpack-btn:hover {
   box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+}
+
+.achievements-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.28);
+}
+
+.achievements-btn:hover {
+  box-shadow: 0 12px 32px rgba(217, 119, 6, 0.4);
+}
+
+.achievement-badge {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
 }
 
 .btn-icon {
