@@ -200,6 +200,7 @@ function addCoinsDebug() {
   gap: 18px;
   width: 100%;
   max-width: 320px;
+  padding-top: 12px;
 }
 
 .action-btn {
@@ -269,17 +270,17 @@ function addCoinsDebug() {
 
 .badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: 8px;
+  right: 12px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #fff;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   border: 2px solid rgba(255, 255, 255, 0.6);
