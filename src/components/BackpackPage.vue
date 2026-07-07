@@ -115,7 +115,7 @@ function clearScratched() {
 .backpack-page {
   width: 100%;
   min-height: 100vh;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
 }
@@ -124,44 +124,57 @@ function clearScratched() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
-  margin-bottom: 20px;
+  padding: 8px 0;
+  margin-bottom: 24px;
 }
 
 .back-btn {
   padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 20px;
-  font-size: 16px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(31, 41, 55, 0.08);
+  border-radius: 999px;
+  font-size: 15px;
+  color: rgba(31, 41, 55, 0.85);
   cursor: pointer;
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
 .back-btn:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
 }
 
 .page-title {
-  font-size: 24px;
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 6px rgba(217, 119, 6, 0.15));
 }
 
 .clear-btn {
   padding: 10px 20px;
-  background: rgba(255, 107, 107, 0.9);
-  border: none;
-  border-radius: 20px;
-  font-size: 16px;
-  color: #fff;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 999px;
+  font-size: 15px;
+  color: #ef4444;
   cursor: pointer;
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
-.clear-btn:hover {
-  background: #ff6b6b;
+.clear-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.clear-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .main-content {
@@ -179,57 +192,65 @@ function clearScratched() {
 .empty-icon {
   font-size: 80px;
   margin-bottom: 20px;
+  filter: drop-shadow(0 0 16px rgba(250, 204, 21, 0.25));
 }
 
 .empty-text {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 20px;
+  color: rgba(31, 41, 55, 0.7);
+  margin-bottom: 24px;
 }
 
 .go-shop-btn {
   padding: 15px 40px;
-  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   border: none;
-  border-radius: 30px;
-  font-size: 18px;
+  border-radius: 999px;
+  font-size: 17px;
   color: #fff;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.28);
 }
 
 .go-shop-btn:hover {
   transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
 }
 
 .backpack-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .lottery-item {
-  background: #fff;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: none;
+  transition: transform 0.25s, box-shadow 0.25s;
   padding: 0;
   text-align: left;
   font-family: inherit;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .lottery-item:hover:not(.scratched) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .lottery-item:disabled,
 .lottery-item.scratched {
-  opacity: 0.7;
+  opacity: 0.65;
   cursor: default;
 }
 
@@ -238,86 +259,104 @@ function clearScratched() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
+  font-size: 42px;
+  position: relative;
+}
+
+.lottery-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.1) 100%);
 }
 
 .lottery-cover.gold {
-  background: linear-gradient(135deg, #ffd700, #ffb700);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
 }
 
 .lottery-cover.diamond {
-  background: linear-gradient(135deg, #e0e0e0, #9e9e9e);
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
 }
 
 .lottery-cover.red {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
 }
 
 .lottery-cover.green {
-  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
 }
 
 .lottery-cover.rainbow {
-  background: linear-gradient(135deg, #ff6b6b, #ffd700, #4ECDC4);
+  background: linear-gradient(135deg, #f87171, #fbbf24, #34d399);
 }
 
 .lottery-cover.red-gold {
-  background: linear-gradient(135deg, #ff6b6b, #ffd700);
+  background: linear-gradient(135deg, #f87171, #fbbf24);
 }
 
 .lottery-cover.red-lucky {
-  background: linear-gradient(135deg, #e60012, #ff8a00);
+  background: linear-gradient(135deg, #fb7185, #fb923c);
 }
 
 .lottery-info {
-  padding: 10px;
+  padding: 12px;
   text-align: center;
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .lottery-name {
   font-size: 14px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: #1f2937;
   display: block;
 }
 
 .prize-result {
-  font-size: 12px;
-  color: #4ECDC4;
+  font-size: 13px;
+  color: #d97706;
+  font-weight: 800;
   display: block;
-  margin-top: 5px;
+  margin-top: 6px;
 }
 
 .status-badge {
   font-size: 12px;
-  color: #ff6b6b;
-  display: block;
-  margin-top: 5px;
+  color: rgba(31, 41, 55, 0.55);
+  display: inline-block;
+  margin-top: 6px;
+  background: rgba(31, 41, 55, 0.05);
+  padding: 3px 8px;
+  border-radius: 999px;
 }
 
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .tab-btn {
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 20px;
+  padding: 10px 22px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
   font-size: 14px;
+  color: rgba(31, 41, 55, 0.7);
   cursor: pointer;
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
 .tab-btn:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1f2937;
 }
 
 .tab-btn.active {
-  background: #fff;
-  font-weight: bold;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background: rgba(255, 251, 235, 0.9);
+  border-color: rgba(250, 204, 21, 0.5);
+  color: #b45309;
+  font-weight: 800;
+  box-shadow: 0 4px 16px rgba(250, 204, 21, 0.15);
 }
 </style>

@@ -83,7 +83,7 @@ function addCoinsDebug() {
 .home-page {
   width: 100%;
   min-height: 100vh;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
 }
@@ -91,27 +91,33 @@ function addCoinsDebug() {
 .header {
   display: flex;
   justify-content: flex-end;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .coins-display {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #ffd700, #ffb700);
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(250, 204, 21, 0.35);
   padding: 10px 20px;
-  border-radius: 30px;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  border-radius: 999px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
 }
 
 .coins-icon {
-  font-size: 24px;
-  margin-right: 8px;
+  font-size: 22px;
+  filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.4));
 }
 
 .coins-count {
   font-size: 20px;
-  font-weight: bold;
-  color: #8B4513;
+  font-weight: 800;
+  color: #b45309;
+  letter-spacing: 0.5px;
 }
 
 .main-content {
@@ -120,67 +126,80 @@ function addCoinsDebug() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-bottom: 40px;
 }
 
 .logo-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .game-title {
-  font-size: 48px;
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 3px 3px 0 #ff6b6b, 6px 6px 0 rgba(0,0,0,0.2);
-  margin-bottom: 10px;
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 10px rgba(217, 119, 6, 0.15));
 }
 
 .game-subtitle {
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  color: rgba(31, 41, 55, 0.65);
+  letter-spacing: 4px;
+  text-transform: uppercase;
 }
 
 .stats-section {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px 40px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  margin-bottom: 40px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 24px 44px;
+  border-radius: 20px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+  margin-bottom: 36px;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 30px;
+  padding: 0 32px;
 }
 
 .stat-value {
-  font-size: 32px;
-  font-weight: bold;
-  color: #ff6b6b;
+  font-size: 36px;
+  font-weight: 900;
+  color: #d97706;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #666;
-  margin-top: 5px;
+  font-size: 13px;
+  color: rgba(31, 41, 55, 0.6);
+  margin-top: 6px;
+  letter-spacing: 1px;
 }
 
 .stat-divider {
   width: 1px;
-  height: 50px;
-  background: #ddd;
+  height: 46px;
+  background: linear-gradient(180deg, transparent, rgba(31, 41, 55, 0.15), transparent);
 }
 
 .buttons-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 }
 
 .action-btn {
@@ -189,92 +208,125 @@ function addCoinsDebug() {
   justify-content: center;
   padding: 20px;
   border: none;
-  border-radius: 15px;
-  font-size: 20px;
-  font-weight: bold;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
   position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+  opacity: 0.7;
 }
 
 .action-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.action-btn:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 .shop-btn {
-  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #fff;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.28);
+}
+
+.shop-btn:hover {
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
 }
 
 .backpack-btn {
-  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: #fff;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
+}
+
+.backpack-btn:hover {
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
 }
 
 .btn-icon {
-  font-size: 28px;
-  margin-right: 10px;
+  font-size: 26px;
+  margin-right: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .btn-text {
-  font-size: 20px;
+  font-size: 18px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 2px;
 }
 
 .badge {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background: #ffd700;
-  color: #8B4513;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  z-index: 2;
 }
 
 .refresh-btn {
-  margin-top: 30px;
-  padding: 12px 30px;
-  border: none;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 25px;
+  margin-top: 32px;
+  padding: 12px 28px;
+  border: 1px solid rgba(31, 41, 55, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
   font-size: 14px;
-  color: #666;
+  color: rgba(31, 41, 55, 0.7);
   cursor: pointer;
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
 .refresh-btn:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1f2937;
 }
 
 .debug-btn {
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 10px 20px;
-  border: none;
-  background: rgba(255, 215, 0, 0.9);
-  border-radius: 20px;
-  font-size: 14px;
-  color: #8B4513;
-  font-weight: bold;
+  border: 1px solid rgba(250, 204, 21, 0.4);
+  background: rgba(255, 251, 235, 0.72);
+  border-radius: 999px;
+  font-size: 13px;
+  color: #b45309;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .debug-btn:hover {
-  background: #ffd700;
+  background: rgba(255, 251, 235, 0.95);
   transform: scale(1.05);
 }
 
 .disclaimer {
-  margin-top: 40px;
+  margin-top: 36px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(31, 41, 55, 0.45);
   text-align: center;
+  letter-spacing: 0.5px;
 }
 </style>

@@ -877,7 +877,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 .scratch-page {
   width: 100%;
   min-height: 100vh;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
 }
@@ -886,48 +886,60 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
-  margin-bottom: 20px;
+  padding: 8px 0;
+  margin-bottom: 24px;
 }
 
 .back-btn {
   padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 20px;
-  font-size: 16px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(31, 41, 55, 0.08);
+  border-radius: 999px;
+  font-size: 15px;
+  color: rgba(31, 41, 55, 0.85);
   cursor: pointer;
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
 .back-btn:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
 }
 
 .page-title {
-  font-size: 24px;
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 6px rgba(217, 119, 6, 0.15));
 }
 
 .coins-display {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #ffd700, #ffb700);
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(250, 204, 21, 0.35);
   padding: 8px 16px;
-  border-radius: 25px;
+  border-radius: 999px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
 }
 
 .coins-icon {
   font-size: 20px;
-  margin-right: 6px;
+  filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.4));
 }
 
 .coins-count {
   font-size: 18px;
-  font-weight: bold;
-  color: #8B4513;
+  font-weight: 800;
+  color: #b45309;
 }
 
 .main-content {
@@ -944,40 +956,47 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .lottery-frame {
-  background: #fff;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
 }
 
 .lottery-header {
-  background: linear-gradient(135deg, #4ECDC4, #44A08D);
-  padding: 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
+  padding: 22px;
   text-align: center;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.06);
 }
 
 .lottery-name {
   font-size: 22px;
-  font-weight: bold;
+  font-weight: 900;
   color: #fff;
   display: block;
+  letter-spacing: 1px;
 }
 
 .lottery-price {
   font-size: 14px;
-  color: rgba(255,255,255,0.8);
-  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6px;
+  font-weight: 600;
 }
 
 .game-area {
   padding: 15px;
-  border-bottom: 1px dashed #eee;
+  border-bottom: 1px dashed rgba(31, 41, 55, 0.1);
 }
 
 .area-title {
   font-size: 16px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: rgba(31, 41, 55, 0.85);
   margin-bottom: 15px;
   text-align: center;
 }
@@ -1281,25 +1300,30 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 
 .match-result {
   text-align: center;
-  margin-top: 15px;
-  padding: 12px;
-  background: rgba(255, 215, 0, 0.1);
-  border-radius: 8px;
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 251, 235, 0.72);
+  border: 1px solid rgba(250, 204, 21, 0.25);
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
 }
 
 .match-count {
-  font-size: 16px;
-  font-weight: bold;
-  color: #8B4513;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(31, 41, 55, 0.75);
 }
 
 .total-prize {
-  font-size: 18px;
-  font-weight: bold;
-  color: #ff6b6b;
+  font-size: 20px;
+  font-weight: 900;
+  color: #d97706;
 }
 
 .number-cell {
@@ -1825,10 +1849,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .lottery-footer {
-  padding: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .reveal-section {
@@ -1837,30 +1862,42 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 
 .action-section {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
 }
 
 .action-btn {
   flex: 1;
-  padding: 15px;
+  padding: 16px;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+  opacity: 0.7;
 }
 
 .reveal-all-btn {
-  background: linear-gradient(135deg, #ffd700, #ffb700);
-  color: #8B4513;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
   width: 100%;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.28);
 }
 
 .next-btn {
-  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: #fff;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
 }
 
 .next-btn:hover,
@@ -1869,8 +1906,15 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .lottery-footer .back-btn {
-  background: linear-gradient(135deg, #ff6b6b, #ff8E53);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(31, 41, 55, 0.08);
+  color: rgba(31, 41, 55, 0.85);
+  box-shadow: none;
+}
+
+.lottery-footer .back-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
 }
 
 .result-animation {
