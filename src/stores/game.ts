@@ -70,7 +70,7 @@ const lotteries: Lottery[] = [
     theme: 'red-lucky',
     type: 'lucky',
     playType: 'luckyDouble',
-    description: '刮开覆盖膜，在同一局游戏中刮出3个相同图符即可获得该局奖金；刮出“¥”图符即可获得该局奖金的两倍，20次机会兼中兼得'
+    description: '刮开覆盖膜，在同一局游戏中刮出3个相同图符即可获得该局奖金；刮出“¥”图符即可获得该局奖金的两倍，10次机会兼中兼得'
   }
 ]
 
@@ -393,8 +393,8 @@ function generateXiXiangFengContent(): {
   return { xiXiangFengCells: cells }
 }
 
-// 幸运加倍 - 20 局图符匹配型（参考现实 20 元福彩玩法）
-// 规则：每局 3 个图符；3 个相同图符即可赢得该局右侧奖金；出现 “¥” 图符则该局奖金翻倍；20 局兼中兼得
+// 幸运加倍 - 10 局图符匹配型（参考现实 10 元福彩玩法）
+// 规则：每局 3 个图符；3 个相同图符即可赢得该局右侧奖金；出现 “¥” 图符则该局奖金翻倍；10 局兼中兼得
 function generateLuckyDoubleContent(): {
   luckyDoubleRounds: Array<{
     roundIndex: number
@@ -405,8 +405,8 @@ function generateLuckyDoubleContent(): {
   }>
 } {
   const { prize: targetPrize } = determinePrize('7')
-  // 20 局对应的右侧奖金（按真实票面顺序，将 100 万缩放为 10000 金币）
-  const roundPrizes = [20, 30, 200, 80, 40, 5000, 60, 1000, 20, 200, 40, 1000, 30, 10000, 80, 20, 500, 60, 5000, 30]
+  // 10 局对应的右侧奖金（按真实票面顺序，将 100 万缩放为 10000 金币）
+  const roundPrizes = [20, 40, 50, 80, 100, 200, 500, 1000, 5000, 10000]
   const allSymbols = ['💰', '☁', '🍀', '🎁', '🏯', '🪭', '🧨', '🍑', '🪙', '🍊', '🍎', '🏮', '🎀', '💎', '🪁', '🍶', '🌸', '🎋', '🪷', '🪕', '🧧', '🎒', '🎈', '🎰', '🍭', '✨', '🍌', '☯️']
   const doubleSymbol = '¥'
 
@@ -418,7 +418,7 @@ function generateLuckyDoubleContent(): {
     isWinning: boolean
   }> = []
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     const [s1, s2, s3] = pickThreeDistinctSymbols(allSymbols)
     rounds.push({
       roundIndex: i + 1,

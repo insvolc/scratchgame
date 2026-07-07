@@ -423,7 +423,7 @@
             </div>
           </div>
 
-          <!-- 幸运加倍 - 20 局图符匹配 -->
+          <!-- 幸运加倍 - 10 局图符匹配 -->
           <div v-if="currentLottery.luckyDoubleRounds" class="game-area lucky-double-area">
             <div class="lucky-double-ticket">
               <div class="lucky-double-shine"></div>
@@ -435,7 +435,7 @@
                 </div>
                 <div class="lucky-double-title">
                   <span class="title-main">幸运加倍</span>
-                  <span class="title-sub">20次中奖机会</span>
+                  <span class="title-sub">10次中奖机会</span>
                 </div>
                 <div class="lucky-double-prize-banner">
                   <span class="prize-label">最高奖金</span>
@@ -445,7 +445,7 @@
               </div>
 
               <div class="lucky-double-rules">
-                刮开覆盖膜，在同一局游戏中刮出 3 个相同的图符，即可获得该局右侧所示奖金；如果在任意一局游戏中刮出 “¥” 图符，即可获得该局奖金的两倍。20 局游戏，中奖奖金兼中兼得。
+                刮开覆盖膜，在同一局游戏中刮出 3 个相同的图符，即可获得该局右侧所示奖金；如果在任意一局游戏中刮出 “¥” 图符，即可获得该局奖金的两倍。10 局游戏，中奖奖金兼中兼得。
               </div>
 
               <div class="scratch-wrapper lucky-double-scratch">
