@@ -14,11 +14,6 @@
     <main class="main-content" v-if="currentLottery">
       <div class="lottery-container">
         <div class="lottery-frame">
-          <div class="lottery-header">
-            <span class="lottery-name">{{ currentLottery.lotteryName }}</span>
-            <span class="lottery-price">面值：{{ getLotteryPrice(currentLottery.lotteryId) }}金币</span>
-          </div>
-          
           <!-- 点石成金 - 数字匹配（符合现实玩法） -->
           <div v-if="currentLottery.myNumbers" class="game-area dianshi-area">
             <div class="dianshi-ticket">
@@ -964,28 +959,6 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
     0 24px 60px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(14px);
-}
-
-.lottery-header {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
-  padding: 22px;
-  text-align: center;
-  border-bottom: 1px solid rgba(31, 41, 55, 0.06);
-}
-
-.lottery-name {
-  font-size: 22px;
-  font-weight: 900;
-  color: #fff;
-  display: block;
-  letter-spacing: 1px;
-}
-
-.lottery-price {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
-  margin-top: 6px;
-  font-weight: 600;
 }
 
 .game-area {
