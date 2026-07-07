@@ -60,6 +60,17 @@ const lotteries: Lottery[] = [
     type: 'xi',
     playType: 'xiXiangFeng',
     description: '刮开覆盖层，出现“喜”字图符可获得对应奖金，出现“囍”字图符可获得对应奖金的两倍，25次机会兼中兼得'
+  },
+  {
+    id: '7',
+    name: '幸运加倍',
+    price: 20,
+    maxPrize: 10000,
+    probability: '1:2.9',
+    theme: 'red-lucky',
+    type: 'lucky',
+    playType: 'luckyDouble',
+    description: '刮开覆盖膜，在同一局游戏中刮出3个相同图符即可获得该局奖金；刮出“¥”图符即可获得该局奖金的两倍，20次机会兼中兼得'
   }
 ]
 
@@ -99,6 +110,14 @@ const prizeConfigs: Record<string, { result: LotteryResult; prize: number; proba
     { result: 'second', prize: 50, probability: 0.12 },
     { result: 'third', prize: 20, probability: 0.45 },
     { result: 'none', prize: 0, probability: 0.40 }
+  ],
+  '7': [
+    { result: 'grand', prize: 10000, probability: 0.002 },
+    { result: 'first', prize: 1000, probability: 0.015 },
+    { result: 'second', prize: 500, probability: 0.03 },
+    { result: 'third', prize: 100, probability: 0.10 },
+    { result: 'fourth', prize: 20, probability: 0.20 },
+    { result: 'none', prize: 0, probability: 0.653 }
   ]
 }
 
@@ -374,6 +393,132 @@ function generateXiXiangFengContent(): {
   return { xiXiangFengCells: cells }
 }
 
+// 幸运加倍 - 20 局图符匹配型（参考现实 20 元福彩玩法）
+// 规则：每局 3 个图符；3 个相同图符即可赢得该局右侧奖金；出现 “¥” 图符则该局奖金翻倍；20 局兼中兼得
+function generateLuckyDoubleContent(): {
+  luckyDoubleRounds: Array<{
+    roundIndex: number
+    symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>
+    prize: number
+    multiplier: number
+    isWinning: boolean
+  }>
+} {
+  const { prize: targetPrize } = determinePrize('7')
+  // 20 局对应的右侧奖金（按真实票面顺序，将 100 万缩放为 10000 金币）
+  const roundPrizes = [20, 30, 200, 80, 40, 5000, 60, 1000, 20, 200, 40, 1000, 30, 10000, 80, 20, 500, 60, 5000, 30]
+  const allSymbols = ['💰', '☁', '🍀', '🎁', '🏯', '🪭', '🧨', '🍑', '🪙', '🍊', '🍎', '🏮', '🎀', '💎', '🪁', '🍶', '🌸', '🎋', '🪷', '🪕', '🧧', '🎒', '🎈', '🎰', '🍭', '✨', '🍌', '☯️']
+  const doubleSymbol = '¥'
+
+  const rounds: Array<{
+    roundIndex: number
+    symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>
+    prize: number
+    multiplier: number
+    isWinning: boolean
+  }> = []
+
+  for (let i = 0; i < 20; i++) {
+    const [s1, s2, s3] = pickThreeDistinctSymbols(allSymbols)
+    rounds.push({
+      roundIndex: i + 1,
+      symbols: [
+        { symbol: s1, isWinning: false, isRevealed: false },
+        { symbol: s2, isWinning: false, isRevealed: false },
+        { symbol: s3, isWinning: false, isRevealed: false }
+      ],
+      prize: roundPrizes[i],
+      multiplier: 1,
+      isWinning: false
+    })
+  }
+
+  if (targetPrize > 0) {
+    // 将目标奖金拆分为若干局的组合（优先使用高奖金局，允许翻倍）
+    const winPlans = buildLuckyDoubleWinPlans(targetPrize, roundPrizes)
+
+    for (const plan of winPlans) {
+      const round = rounds[plan.idx]
+      round.multiplier = plan.multiplier
+      round.isWinning = true
+
+      if (plan.multiplier === 2) {
+        // 出现 “¥” 图符即翻倍：放置一个 ¥，其余两个为不同普通图符
+        const [s1, s2] = pickTwoDistinctSymbols(allSymbols)
+        round.symbols = shuffleArray([
+          { symbol: doubleSymbol, isWinning: true, isRevealed: false },
+          { symbol: s1, isWinning: true, isRevealed: false },
+          { symbol: s2, isWinning: true, isRevealed: false }
+        ])
+      } else {
+        // 三同号中奖：3 个相同普通图符
+        const symbol = allSymbols[Math.floor(Math.random() * allSymbols.length)]
+        round.symbols = [
+          { symbol, isWinning: true, isRevealed: false },
+          { symbol, isWinning: true, isRevealed: false },
+          { symbol, isWinning: true, isRevealed: false }
+        ]
+      }
+    }
+  }
+
+  return { luckyDoubleRounds: rounds }
+}
+
+function pickThreeDistinctSymbols(symbols: string[]): [string, string, string] {
+  const pool = [...symbols]
+  const result: string[] = []
+  for (let i = 0; i < 3; i++) {
+    const idx = Math.floor(Math.random() * pool.length)
+    result.push(pool.splice(idx, 1)[0])
+  }
+  return result as [string, string, string]
+}
+
+function pickTwoDistinctSymbols(symbols: string[]): [string, string] {
+  const pool = [...symbols]
+  const idx1 = Math.floor(Math.random() * pool.length)
+  const s1 = pool.splice(idx1, 1)[0]
+  const idx2 = Math.floor(Math.random() * pool.length)
+  const s2 = pool.splice(idx2, 1)[0]
+  return [s1, s2]
+}
+
+function shuffleArray<T>(arr: T[]): T[] {
+  return arr.sort(() => Math.random() - 0.5)
+}
+
+// 将目标奖金拆分为若干局的 { multiplier }，优先保证精确匹配并适当展示 ¥ 翻倍
+function buildLuckyDoubleWinPlans(targetPrize: number, roundPrizes: number[]): Array<{ multiplier: 1 | 2; idx: number }> {
+  // 预定义各目标奖金的精确拆分方案，确保 “¥” 翻倍特征能够出现
+  const combos: Record<number, Array<{ prize: number; multiplier: 1 | 2 }>> = {
+    10000: [{ prize: 5000, multiplier: 2 }],
+    1000: [{ prize: 500, multiplier: 2 }],
+    500: [{ prize: 500, multiplier: 1 }],
+    100: [{ prize: 40, multiplier: 2 }, { prize: 20, multiplier: 1 }],
+    20: [{ prize: 20, multiplier: 1 }]
+  }
+
+  const combo = combos[targetPrize]
+  if (!combo) return []
+
+  const plans: Array<{ multiplier: 1 | 2; idx: number }> = []
+  const used = new Set<number>()
+
+  for (const { prize, multiplier } of combo) {
+    const candidates = roundPrizes
+      .map((p, i) => ({ p, i }))
+      .filter(({ p, i }) => p === prize && !used.has(i))
+    if (candidates.length === 0) return []
+
+    const idx = candidates[Math.floor(Math.random() * candidates.length)].i
+    plans.push({ multiplier, idx })
+    used.add(idx)
+  }
+
+  return plans
+}
+
 function determinePrize(lotteryId: string): { result: LotteryResult; prize: number } {
   const config = prizeConfigs[lotteryId] || prizeConfigs['1']
   const random = Math.random()
@@ -401,6 +546,8 @@ function generateLotteryContent(lottery: Lottery): Record<string, unknown> {
       return generateMixedContent()
     case 'xiXiangFeng':
       return generateXiXiangFengContent()
+    case 'luckyDouble':
+      return generateLuckyDoubleContent()
     default:
       return generateNumberMatchContent()
   }
@@ -481,6 +628,22 @@ export const useGameStore = defineStore('game', () => {
       return { result, prize: totalPrize }
     }
 
+    if (lotteryId === '7' && content.luckyDoubleRounds) {
+      const rounds = content.luckyDoubleRounds as Array<{ prize: number; multiplier: number; isWinning: boolean }>
+      const totalPrize = rounds.reduce((sum, round) => {
+        return round.isWinning ? sum + round.prize * round.multiplier : sum
+      }, 0)
+
+      let result: LotteryResult = 'none'
+      if (totalPrize >= 5000) result = 'grand'
+      else if (totalPrize >= 1000) result = 'first'
+      else if (totalPrize >= 500) result = 'second'
+      else if (totalPrize >= 100) result = 'third'
+      else if (totalPrize > 0) result = 'fourth'
+
+      return { result, prize: totalPrize }
+    }
+
     return determinePrize(lotteryId)
   }
   
@@ -505,6 +668,7 @@ export const useGameStore = defineStore('game', () => {
       prize,
       result,
       ...(lottery.playType === 'xiXiangFeng' ? { claimedXiCells: [], claimedPrize: 0 } : {}),
+      ...(lottery.playType === 'luckyDouble' ? { claimedLuckyDoubleRounds: [], claimedPrize: 0 } : {}),
       ...content
     } as BackpackItem)
 
@@ -544,6 +708,14 @@ export const useGameStore = defineStore('game', () => {
           const row = item.xiXiangFengCells[areaIndex]
           if (row && row[cellIndex]) {
             row[cellIndex] = { ...row[cellIndex], isRevealed: true }
+          }
+        }
+        break
+      case 'luckyDouble':
+        if (item.luckyDoubleRounds) {
+          const round = item.luckyDoubleRounds[areaIndex]
+          if (round && round.symbols[cellIndex]) {
+            round.symbols[cellIndex] = { ...round.symbols[cellIndex], isRevealed: true }
           }
         }
         break
@@ -596,6 +768,13 @@ export const useGameStore = defineStore('game', () => {
       )
     }
 
+    if (item.luckyDoubleRounds) {
+      item.luckyDoubleRounds = item.luckyDoubleRounds.map(round => ({
+        ...round,
+        symbols: round.symbols.map(s => ({ ...s, isRevealed: true }))
+      }))
+    }
+
     saveState()
   }
   
@@ -641,6 +820,13 @@ export const useGameStore = defineStore('game', () => {
         item.xiXiangFengCells.forEach(row => {
           totalCells += row.length
           revealedCells += row.filter(cell => cell.isRevealed).length
+        })
+      }
+
+      if (item.luckyDoubleRounds) {
+        item.luckyDoubleRounds.forEach(round => {
+          totalCells += round.symbols.length
+          revealedCells += round.symbols.filter(s => s.isRevealed).length
         })
       }
 

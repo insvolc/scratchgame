@@ -8,7 +8,7 @@ export interface Lottery {
   probability: string
   theme: string
   type: string
-  playType: 'numberMatch' | 'lineMatch' | 'match3' | 'bonus' | 'xiXiangFeng'
+  playType: 'numberMatch' | 'lineMatch' | 'match3' | 'bonus' | 'xiXiangFeng' | 'luckyDouble'
   description: string
 }
 
@@ -34,6 +34,14 @@ export interface BackpackItem {
   bonusPrizes?: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
   xiXiangFengCells?: Array<Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }>>
   claimedXiCells?: string[]
+  luckyDoubleRounds?: Array<{
+    roundIndex: number
+    symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }>
+    prize: number
+    multiplier: number
+    isWinning: boolean
+  }>
+  claimedLuckyDoubleRounds?: number[]
   claimedPrize?: number
 }
 

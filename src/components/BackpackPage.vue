@@ -265,6 +265,10 @@ function clearScratched() {
   background: linear-gradient(135deg, #ff6b6b, #ffd700);
 }
 
+.lottery-cover.red-lucky {
+  background: linear-gradient(135deg, #e60012, #ff8a00);
+}
+
 .lottery-info {
   padding: 10px;
   text-align: center;

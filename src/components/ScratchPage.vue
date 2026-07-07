@@ -431,6 +431,117 @@
             </div>
           </div>
 
+          <!-- 幸运加倍 - 20 局图符匹配 -->
+          <div v-if="currentLottery.luckyDoubleRounds" class="game-area lucky-double-area">
+            <div class="lucky-double-ticket">
+              <div class="lucky-double-shine"></div>
+
+              <div class="lucky-double-header">
+                <div class="lucky-double-price">
+                  <span class="price-value">{{ getLotteryPrice(currentLottery.lotteryId) }}</span>
+                  <span class="price-unit">金币</span>
+                </div>
+                <div class="lucky-double-title">
+                  <span class="title-main">幸运加倍</span>
+                  <span class="title-sub">20次中奖机会</span>
+                </div>
+                <div class="lucky-double-prize-banner">
+                  <span class="prize-label">最高奖金</span>
+                  <span class="prize-value">{{ formatPrize(getLotteryMaxPrize(currentLottery.lotteryId)) }}</span>
+                  <span class="prize-unit">金币</span>
+                </div>
+              </div>
+
+              <div class="lucky-double-rules">
+                刮开覆盖膜，在同一局游戏中刮出 3 个相同的图符，即可获得该局右侧所示奖金；如果在任意一局游戏中刮出 “¥” 图符，即可获得该局奖金的两倍。20 局游戏，中奖奖金兼中兼得。
+              </div>
+
+              <div class="scratch-wrapper lucky-double-scratch">
+                <ScratchCanvas
+                  v-if="!currentLottery.isScratched"
+                  ref="luckyDoubleScratchCanvasRef"
+                  :brush-size="22"
+                  coating-color="#e60012"
+                  coating-text-color="#ffd700"
+                  coating-pattern="xi"
+                  pattern-color="rgba(255, 215, 0, 0.35)"
+                  pattern-symbol="¥"
+                  :pattern-rows="4"
+                  :pattern-cols="5"
+                  @revealed="() => onAreaRevealed('luckydouble')"
+                >
+                  <div class="lucky-double-rounds">
+                    <div
+                      v-for="(round, roundIdx) in currentLottery.luckyDoubleRounds"
+                      :key="'ldround-' + roundIdx"
+                      class="lucky-double-round"
+                      :class="{ winning: selectedLuckyDoubleRounds.has(roundIdx), double: round.multiplier === 2 }"
+                      @click="handleLuckyDoubleRoundClick(roundIdx)"
+                    >
+                      <span class="round-label">第{{ round.roundIndex }}局</span>
+                      <div class="round-symbols">
+                        <span
+                          v-for="(sym, symIdx) in round.symbols"
+                          :key="'ldsym-' + roundIdx + '-' + symIdx"
+                          class="round-symbol"
+                          :class="{ 'double-symbol': sym.symbol === '¥' }"
+                        >
+                          {{ sym.symbol }}
+                        </span>
+                      </div>
+                      <div class="round-prize">
+                        <span class="prize-currency">¥</span>
+                        <span class="prize-amount">{{ formatPrize(round.prize * round.multiplier) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </ScratchCanvas>
+                <div v-else class="lucky-double-rounds">
+                  <div
+                    v-for="(round, roundIdx) in currentLottery.luckyDoubleRounds"
+                    :key="'ldround-' + roundIdx"
+                    class="lucky-double-round"
+                    :class="{ winning: selectedLuckyDoubleRounds.has(roundIdx), double: round.multiplier === 2 }"
+                    @click="handleLuckyDoubleRoundClick(roundIdx)"
+                  >
+                    <span class="round-label">第{{ round.roundIndex }}局</span>
+                    <div class="round-symbols">
+                      <span
+                        v-for="(sym, symIdx) in round.symbols"
+                        :key="'ldsym-' + roundIdx + '-' + symIdx"
+                        class="round-symbol"
+                        :class="{ 'double-symbol': sym.symbol === '¥' }"
+                      >
+                        {{ sym.symbol }}
+                      </span>
+                    </div>
+                    <div class="round-prize">
+                      <span class="prize-currency">¥</span>
+                      <span class="prize-amount">{{ formatPrize(round.prize * round.multiplier) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="lucky-double-footer-banner">
+                最高奖金 100 万元
+              </div>
+
+              <div class="lucky-double-security">
+                <span>保安区刮开无效</span>
+              </div>
+            </div>
+
+            <div class="lucky-double-hint">
+              <span>刮开后点击中奖局领取奖金，“¥” 图符可使该局奖金翻倍</span>
+            </div>
+
+            <div class="match-result" v-if="currentLottery.isScratched && currentLottery.luckyDoubleRounds">
+              <span class="match-count">已领取 {{ selectedLuckyDoubleRounds.size }} 局中奖金</span>
+              <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+            </div>
+          </div>
+
           <!-- 操作按钮 -->
           <div class="lottery-footer">
             <div v-if="!currentLottery.isScratched" class="reveal-section">
@@ -481,8 +592,10 @@ const coins = computed(() => gameStore.coins)
 const showResultAnimation = ref(false)
 const selectedMyNumbers = ref<Set<number>>(new Set())
 const selectedXiCells = ref<Set<string>>(new Set())
+const selectedLuckyDoubleRounds = ref<Set<number>>(new Set())
 const scratchCanvasRefs = ref<Map<string, InstanceType<typeof ScratchCanvas>>>(new Map())
 const xiScratchCanvasRef = ref<InstanceType<typeof ScratchCanvas> | null>(null)
+const luckyDoubleScratchCanvasRef = ref<InstanceType<typeof ScratchCanvas> | null>(null)
 const revealedAreas = ref<Set<string>>(new Set())
 const hasClickedWinningNumber = ref(false)
 const claimedPrize = ref(0)
@@ -499,6 +612,7 @@ const totalScratchAreas = computed(() => {
   if (lottery.symbolArea) count += 1
   if (lottery.bonusPrizes) count += 1
   if (lottery.xiXiangFengCells) count += 1
+  if (lottery.luckyDoubleRounds) count += 1
 
   return count
 })
@@ -525,7 +639,11 @@ const displayPrize = computed(() => {
   if (lottery.xiXiangFengCells) {
     return claimedPrize.value
   }
-  
+
+  if (lottery.luckyDoubleRounds) {
+    return claimedPrize.value
+  }
+
   return lottery.prize || 0
 })
 
@@ -535,7 +653,8 @@ function getLotteryPrice(lotteryId: string): number {
     '3': 50,
     '4': 5,
     '5': 100,
-    '6': 20
+    '6': 20,
+    '7': 20
   }
   return prices[lotteryId] || 0
 }
@@ -614,6 +733,32 @@ function handleXiCellClick(rowIdx: number, colIdx: number) {
   }
 }
 
+function handleLuckyDoubleRoundClick(roundIdx: number) {
+  if (!currentLottery.value?.luckyDoubleRounds) return
+  const round = currentLottery.value.luckyDoubleRounds[roundIdx]
+  if (!round || !round.isWinning) return
+
+  const next = new Set(selectedLuckyDoubleRounds.value)
+  if (!next.has(roundIdx)) {
+    next.add(roundIdx)
+    selectedLuckyDoubleRounds.value = next
+
+    const prize = round.prize * round.multiplier
+    if (prize > 0) {
+      claimedPrize.value += prize
+      if (currentLottery.value) {
+        currentLottery.value.claimedLuckyDoubleRounds = Array.from(next)
+        currentLottery.value.claimedPrize = claimedPrize.value
+      }
+      gameStore.addCoins(prize)
+      showResultAnimation.value = true
+      setTimeout(() => {
+        showResultAnimation.value = false
+      }, 2000)
+    }
+  }
+}
+
 function getConfettiStyle(index: number) {
   const colors = ['#ffd700', '#ff6b6b', '#4ECDC4', '#44A08D', '#ff8E53']
   const left = Math.random() * 100
@@ -664,6 +809,7 @@ function onRevealed() {
 function revealAll() {
   if (currentLottery.value) {
     xiScratchCanvasRef.value?.revealAll()
+    luckyDoubleScratchCanvasRef.value?.revealAll()
     gameStore.scratchLottery(currentLottery.value.id)
 
     if (currentLottery.value.myNumbers && currentLottery.value.prize && currentLottery.value.prize > 0) {
@@ -707,6 +853,7 @@ function resetScratchState() {
   claimedPrize.value = currentLottery.value?.claimedPrize ?? 0
   selectedMyNumbers.value.clear()
   selectedXiCells.value = new Set(currentLottery.value?.claimedXiCells ?? [])
+  selectedLuckyDoubleRounds.value = new Set(currentLottery.value?.claimedLuckyDoubleRounds ?? [])
   revealedAreas.value.clear()
 }
 
@@ -720,7 +867,7 @@ watch(() => currentLottery.value?.id, () => {
 
 watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   if (newVal === true && oldVal === false && currentLottery.value?.prize && currentLottery.value.prize > 0) {
-    if (!currentLottery.value.myNumbers && !currentLottery.value.xiXiangFengCells && claimedPrize.value < currentLottery.value.prize) {
+    if (!currentLottery.value.myNumbers && !currentLottery.value.xiXiangFengCells && !currentLottery.value.luckyDoubleRounds && claimedPrize.value < currentLottery.value.prize) {
       gameStore.addCoins(currentLottery.value.prize - claimedPrize.value)
       claimedPrize.value = currentLottery.value.prize
       showResultAnimation.value = true
@@ -1767,5 +1914,272 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
     transform: translateY(100vh) rotate(720deg);
     opacity: 0;
   }
+}
+
+/* 幸运加倍 */
+.lucky-double-area {
+  padding: 10px;
+}
+
+.lucky-double-ticket {
+  position: relative;
+  background: linear-gradient(180deg, #e60012 0%, #c90010 100%);
+  border-radius: 18px;
+  padding: 16px 10px 14px;
+  color: #fff;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 3px #ffd700,
+    inset 0 0 0 5px #8b0000,
+    0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.lucky-double-ticket::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px dashed rgba(255, 215, 0, 0.55);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.lucky-double-shine {
+  position: absolute;
+  top: -40%;
+  left: -40%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 60%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.lucky-double-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 10px;
+}
+
+.lucky-double-price {
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  color: #8b0000;
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.lucky-double-price .price-value {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.lucky-double-price .price-unit {
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.lucky-double-title {
+  text-align: center;
+}
+
+.lucky-double-title .title-main {
+  display: block;
+  font-size: 32px;
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 4px;
+  text-shadow: 2px 2px 0 #8b0000;
+  line-height: 1.1;
+}
+
+.lucky-double-title .title-sub {
+  display: block;
+  font-size: 11px;
+  color: #ffd700;
+  margin-top: 2px;
+  font-weight: bold;
+}
+
+.lucky-double-prize-banner {
+  text-align: center;
+}
+
+.lucky-double-prize-banner .prize-label {
+  display: block;
+  font-size: 10px;
+  color: #ffd700;
+}
+
+.lucky-double-prize-banner .prize-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 1px 1px 0 #8b0000;
+}
+
+.lucky-double-prize-banner .prize-unit {
+  font-size: 10px;
+  color: #ffd700;
+}
+
+.lucky-double-rules {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  padding: 0 6px;
+  margin-bottom: 10px;
+}
+
+.lucky-double-scratch {
+  margin-bottom: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.lucky-double-scratch .scratch-canvas-container {
+  display: block;
+  width: 100%;
+}
+
+.lucky-double-rounds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 8px;
+  background: linear-gradient(135deg, #fff8dc 0%, #ffe4b5 100%);
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lucky-double-round {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 5px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+  min-width: 0;
+}
+
+.lucky-double-round:active {
+  transform: scale(0.98);
+}
+
+.lucky-double-round.winning {
+  background: radial-gradient(circle at 30% 30%, #fff5a0, #ffd700 60%, #ffb700);
+  border-color: #b8860b;
+  color: #8b0000;
+  animation: pulse 1s infinite;
+}
+
+.lucky-double-round.double {
+  border-color: #b8860b;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.round-label {
+  font-size: 9px;
+  color: #8b0000;
+  font-weight: bold;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 1px;
+}
+
+.round-symbols {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  gap: 2px;
+  padding-left: 6px;
+  min-width: 0;
+}
+
+.round-symbol {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 50%;
+  font-size: 18px;
+  color: #222;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.round-symbol.double-symbol {
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  color: #8b0000;
+  font-weight: bold;
+  border-color: #b8860b;
+}
+
+.round-prize {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  font-weight: 800;
+  color: #8b0000;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.round-prize .prize-currency {
+  font-size: 9px;
+}
+
+.round-prize .prize-amount {
+  font-size: 11px;
+}
+
+.lucky-double-footer-banner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 1px 1px 0 #8b0000;
+  margin-top: 10px;
+}
+
+.lucky-double-security {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  background: #8b0000;
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.lucky-double-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin-top: 12px;
 }
 </style>

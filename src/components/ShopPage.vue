@@ -71,7 +71,8 @@ function getThemeIcon(theme: string): string {
     red: '🏮',
     green: '🍀',
     rainbow: '🌈',
-    'red-gold': '囍'
+    'red-gold': '囍',
+    'red-lucky': '¥'
   }
   return icons[theme] || '🎟️'
 }
@@ -206,6 +207,10 @@ function buyLottery(lotteryId: string) {
 
 .lottery-card.red-gold .lottery-image {
   background: linear-gradient(135deg, #ff6b6b, #ffd700);
+}
+
+.lottery-card.red-lucky .lottery-image {
+  background: linear-gradient(135deg, #e60012, #ff8a00);
 }
 
 .lottery-info {
