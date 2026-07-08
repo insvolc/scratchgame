@@ -36,7 +36,7 @@ export interface Lottery {
   probability: string
   theme: string
   type: string
-  playType: 'numberMatch' | 'lineMatch' | 'match3' | 'bonus' | 'xiXiangFeng' | 'luckyDouble'
+  playType: 'numberMatch' | 'xiXiangFeng' | 'luckyDouble'
   description: string
 }
 
@@ -51,15 +51,6 @@ export interface BackpackItem {
   result: LotteryResult
   myNumbers?: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>
   winningNumbers?: Array<{ value: string; isRevealed: boolean }>
-  grid?: Array<Array<{ symbol: string; isWinning: boolean; isRevealed: boolean; lineIndex: number }>>
-  winningLines?: number[]
-  numberAreas?: Array<{ numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>; prize: number }>
-  numberArea?: {
-    myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>
-    winningNumbers: Array<{ value: string; isRevealed: boolean }>
-  }
-  symbolArea?: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> }
-  bonusPrizes?: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
   xiXiangFengCells?: Array<Array<{ symbol: string; basePrize: number; multiplier: number; isWinning: boolean; isRevealed: boolean }>>
   claimedXiCells?: string[]
   luckyDoubleRounds?: Array<{

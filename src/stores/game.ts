@@ -18,39 +18,6 @@ const lotteries: Lottery[] = [
     description: '刮开"我的号码"区，对照"中奖号码"，出现相同号码即中该号码下方所示奖金'
   },
   {
-    id: '3',
-    name: '走进桃花源',
-    price: 50,
-    maxPrize: 1000,
-    probability: '1:5',
-    theme: 'red',
-    type: 'grid',
-    playType: 'lineMatch',
-    description: '在任一游戏区内，刮出3个相同的图案即中该游戏区的奖金；任意一条连线上的图案完全相同，即中该条连线所示的奖金'
-  },
-  {
-    id: '4',
-    name: '甜蜜蜜',
-    price: 5,
-    maxPrize: 50,
-    probability: '1:4',
-    theme: 'green',
-    type: 'lucky',
-    playType: 'match3',
-    description: '刮开覆盖层，如果任何一个"游戏区"内出现3个相同的图符，即中该游戏区的奖金'
-  },
-  {
-    id: '5',
-    name: '超级财富',
-    price: 100,
-    maxPrize: 10000,
-    probability: '1:3',
-    theme: 'rainbow',
-    type: 'mixed',
-    playType: 'bonus',
-    description: '三大玩法，一票三次中奖机会！数字匹配+找幸运符+奖金即开，三重惊喜等你来'
-  },
-  {
     id: '6',
     name: '喜相逢',
     price: 20,
@@ -81,28 +48,6 @@ const prizeConfigs: Record<string, { result: LotteryResult; prize: number; proba
     { result: 'second', prize: 20, probability: 0.075 },
     { result: 'third', prize: 10, probability: 0.1975 },
     { result: 'none', prize: 0, probability: 0.6975 }
-  ],
-  '3': [
-    { result: 'grand', prize: 1000, probability: 0.002 },
-    { result: 'first', prize: 500, probability: 0.015 },
-    { result: 'second', prize: 100, probability: 0.05 },
-    { result: 'third', prize: 50, probability: 0.10 },
-    { result: 'none', prize: 0, probability: 0.823 }
-  ],
-  '4': [
-    { result: 'first', prize: 50, probability: 0.03 },
-    { result: 'second', prize: 20, probability: 0.07 },
-    { result: 'third', prize: 10, probability: 0.15 },
-    { result: 'fourth', prize: 5, probability: 0.25 },
-    { result: 'none', prize: 0, probability: 0.50 }
-  ],
-  '5': [
-    { result: 'grand', prize: 10000, probability: 0.0005 },
-    { result: 'first', prize: 1000, probability: 0.008 },
-    { result: 'second', prize: 500, probability: 0.03 },
-    { result: 'third', prize: 100, probability: 0.08 },
-    { result: 'fourth', prize: 50, probability: 0.12 },
-    { result: 'none', prize: 0, probability: 0.7615 }
   ],
   '6': [
     { result: 'grand', prize: 500, probability: 0.005 },
@@ -187,139 +132,6 @@ function generateNumberMatchContent(): {
       .sort((a, b) => parseInt(a) - parseInt(b))
       .map(value => ({ value, isRevealed: false }))
   }
-}
-
-// 走进桃花源 - 九宫格连线型
-function generateGridLineContent(): {
-  grid: Array<Array<{ symbol: string; isWinning: boolean; isRevealed: boolean; lineIndex: number }>>;
-  winningLines: number[]
-} {
-  const symbols = ['🌸', '🍑', '🌺', '🌻', '🌷']
-  const lines = [0, 1, 2, 3, 4, 5, 6, 7]
-  
-  const winningLines: number[] = []
-  const gridSymbols: Array<{ symbol: string; isWinning: boolean; lineIndex: number; isRevealed: boolean }> = []
-  
-  const hasWinLine = Math.random() > 0.4
-  
-  if (hasWinLine) {
-    const lineIdx = Math.floor(Math.random() * lines.length)
-    winningLines.push(lineIdx)
-    const winSymbol = symbols[Math.floor(Math.random() * symbols.length)]
-    
-    for (let i = 0; i < 9; i++) {
-      const isOnWinningLine = (
-        (lineIdx === 0 && i >= 0 && i <= 2) ||
-        (lineIdx === 1 && i >= 3 && i <= 5) ||
-        (lineIdx === 2 && i >= 6 && i <= 8) ||
-        (lineIdx === 3 && i % 3 === 0) ||
-        (lineIdx === 4 && i % 3 === 1) ||
-        (lineIdx === 5 && i % 3 === 2) ||
-        (lineIdx === 6 && i % 4 === 0) ||
-        (lineIdx === 7 && (i === 2 || i === 4 || i === 6))
-      )
-      
-      if (isOnWinningLine) {
-        gridSymbols.push({ symbol: winSymbol, isWinning: true, lineIndex: lineIdx, isRevealed: false })
-      } else {
-        gridSymbols.push({ 
-          symbol: symbols[Math.floor(Math.random() * symbols.length)], 
-          isWinning: false, 
-          lineIndex: -1,
-          isRevealed: false 
-        })
-      }
-    }
-  } else {
-    for (let i = 0; i < 9; i++) {
-      gridSymbols.push({ 
-        symbol: symbols[Math.floor(Math.random() * symbols.length)], 
-        isWinning: false, 
-        lineIndex: -1,
-        isRevealed: false 
-      })
-    }
-  }
-  
-  const grid: typeof gridSymbols[] = []
-  for (let r = 0; r < 3; r++) {
-    grid.push(gridSymbols.slice(r * 3, r * 3 + 3))
-  }
-  
-  return { grid, winningLines }
-}
-
-// 甜蜜蜜 - 三同号型
-function generateMatch3Content(): {
-  areas: Array<{
-    numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }>;
-    prize: number
-  }>
-} {
-  const areas = []
-  const areaPrizes = [50, 20, 10]
-  
-  for (let a = 0; a < 3; a++) {
-    const numbers: Array<{ value: string; isWinning: boolean; isRevealed: boolean }> = []
-    const isWinning = Math.random() > 0.5
-    const winningNum = Math.floor(Math.random() * 9) + 1
-    
-    if (isWinning) {
-      for (let i = 0; i < 3; i++) {
-        numbers.push({ value: winningNum.toString(), isWinning: true, isRevealed: false })
-      }
-    } else {
-      const usedNums = new Set<number>()
-      for (let i = 0; i < 3; i++) {
-        let num: number
-        do {
-          num = Math.floor(Math.random() * 9) + 1
-        } while (usedNums.has(num))
-        usedNums.add(num)
-        numbers.push({ value: num.toString(), isWinning: false, isRevealed: false })
-      }
-    }
-    
-    areas.push({ numbers: numbers.sort(() => Math.random() - 0.5), prize: areaPrizes[a] })
-  }
-  
-  return { areas }
-}
-
-// 超级财富 - 复合玩法
-function generateMixedContent(): {
-  numberArea: { myNumbers: Array<{ value: string; prize: number; isWinning: boolean; isRevealed: boolean }>; winningNumbers: Array<{ value: string; isRevealed: boolean }> };
-  symbolArea: { symbols: Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> };
-  bonusPrizes: Array<{ value: number; isWinning: boolean; isRevealed: boolean }>
-} {
-  const numberArea = generateNumberMatchContent()
-  
-  const symbolArea = { symbols: [] as Array<{ symbol: string; isWinning: boolean; isRevealed: boolean }> }
-  const isWinning = Math.random() > 0.5
-  if (isWinning) {
-    for (let i = 0; i < 3; i++) {
-      symbolArea.symbols.push({ symbol: '💎', isWinning: true, isRevealed: false })
-    }
-    const distractionSymbol = ['👑', '⭐', '💰'][Math.floor(Math.random() * 3)]
-    symbolArea.symbols.push({ symbol: distractionSymbol, isWinning: false, isRevealed: false })
-  } else {
-    for (let i = 0; i < 4; i++) {
-      symbolArea.symbols.push({ 
-        symbol: ['👑', '⭐', '💰', '🎁'][Math.floor(Math.random() * 4)], 
-        isWinning: false, 
-        isRevealed: false 
-      })
-    }
-  }
-  symbolArea.symbols = symbolArea.symbols.sort(() => Math.random() - 0.5)
-  
-  const bonusPrizes = [10, 20, 50, 100, 200, 500].map(v => ({
-    value: v,
-    isWinning: v === 500 && Math.random() > 0.7,
-    isRevealed: false
-  }))
-  
-  return { numberArea, symbolArea, bonusPrizes }
 }
 
 // 喜相逢 - 5×5 图符型（符合现实 20 元福彩玩法）
@@ -600,12 +412,6 @@ function generateLotteryContent(lottery: Lottery): Record<string, unknown> {
   switch (lottery.playType) {
     case 'numberMatch':
       return generateNumberMatchContent()
-    case 'lineMatch':
-      return generateGridLineContent()
-    case 'match3':
-      return generateMatch3Content()
-    case 'bonus':
-      return generateMixedContent()
     case 'xiXiangFeng':
       return generateXiXiangFengContent()
     case 'luckyDouble':
@@ -814,17 +620,6 @@ export const useGameStore = defineStore('game', () => {
           item.myNumbers[cellIndex] = { ...item.myNumbers[cellIndex], isRevealed: true }
         }
         break
-      case 'match3':
-        if (item.numberAreas) {
-          item.numberAreas[areaIndex]?.numbers[cellIndex] && 
-          (item.numberAreas[areaIndex].numbers[cellIndex].isRevealed = true)
-        }
-        break
-      case 'bonus':
-        if (item.bonusPrizes) {
-          item.bonusPrizes[cellIndex] && (item.bonusPrizes[cellIndex].isRevealed = true)
-        }
-        break
       case 'xiXiangFeng':
         if (item.xiXiangFengCells) {
           const row = item.xiXiangFengCells[areaIndex]
@@ -860,29 +655,6 @@ export const useGameStore = defineStore('game', () => {
     if (item.winningNumbers) {
       item.winningNumbers = item.winningNumbers.map(n => ({ ...n, isRevealed: true }))
     }
-    
-    if (item.grid) {
-      item.grid = item.grid.map(row => 
-        row.map(cell => ({ ...cell, isRevealed: true }))
-      )
-    }
-    
-    if (item.numberAreas) {
-      item.numberAreas = item.numberAreas.map(area => ({
-        ...area,
-        numbers: area.numbers.map(n => ({ ...n, isRevealed: true }))
-      }))
-    }
-    
-    if (item.numberArea?.myNumbers) {
-      item.numberArea.myNumbers = item.numberArea.myNumbers.map(n => ({ ...n, isRevealed: true }))
-    }
-    if (item.symbolArea?.symbols) {
-      item.symbolArea.symbols = item.symbolArea.symbols.map(s => ({ ...s, isRevealed: true }))
-    }
-    if (item.bonusPrizes) {
-      item.bonusPrizes = item.bonusPrizes.map(b => ({ ...b, isRevealed: true }))
-    }
 
     if (item.xiXiangFengCells) {
       item.xiXiangFengCells = item.xiXiangFengCells.map(row =>
@@ -910,35 +682,7 @@ export const useGameStore = defineStore('game', () => {
         totalCells += item.myNumbers.length
         revealedCells += item.myNumbers.filter(n => n.isRevealed).length
       }
-      
-      if (item.grid) {
-        item.grid.forEach(row => {
-          row.forEach(cell => {
-            totalCells++
-            if (cell.isRevealed) revealedCells++
-          })
-        })
-      }
-      
-      if (item.numberAreas) {
-        item.numberAreas.forEach(area => {
-          totalCells += area.numbers.length
-          revealedCells += area.numbers.filter(n => n.isRevealed).length
-        })
-      }
-      
-      if (item.numberArea?.myNumbers) {
-        totalCells += item.numberArea.myNumbers.length
-        revealedCells += item.numberArea.myNumbers.filter(n => n.isRevealed).length
-      }
-      if (item.symbolArea?.symbols) {
-        totalCells += item.symbolArea.symbols.length
-        revealedCells += item.symbolArea.symbols.filter(s => s.isRevealed).length
-      }
-      if (item.bonusPrizes) {
-        totalCells += item.bonusPrizes.length
-        revealedCells += item.bonusPrizes.filter(b => b.isRevealed).length
-      }
+
       if (item.xiXiangFengCells) {
         item.xiXiangFengCells.forEach(row => {
           totalCells += row.length
