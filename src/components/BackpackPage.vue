@@ -233,6 +233,12 @@ function clearScratched() {
   margin-bottom: 24px;
 }
 
+@media (max-width: 480px) {
+  .backpack-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .lottery-item {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.8);
