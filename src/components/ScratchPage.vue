@@ -55,6 +55,9 @@
                         :brush-size="22"
                         coating-color="#d4a017"
                         coating-text-color="#fff8dc"
+                        :show-hint="false"
+                        :show-english-hint="false"
+                        :coating-text-size="16"
                         @revealed="() => onAreaRevealed('winning')"
                       >
                         <div class="dianshi-win-row">

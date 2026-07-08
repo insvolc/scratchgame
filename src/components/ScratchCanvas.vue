@@ -17,7 +17,7 @@
     <div class="scratch-content">
       <slot></slot>
     </div>
-    <div class="scratch-hint" v-if="!isScratched && scratchPercentage < revealThreshold">
+    <div class="scratch-hint" v-if="!isScratched && scratchPercentage < revealThreshold && showHint !== false">
       <span>👆 滑动刮开涂层</span>
     </div>
   </div>
@@ -38,6 +38,9 @@ const props = defineProps<{
   patternSymbol?: string
   patternRows?: number
   patternCols?: number
+  showHint?: boolean
+  showEnglishHint?: boolean
+  coatingTextSize?: number
 }>()
 
 const emit = defineEmits<{
@@ -181,14 +184,18 @@ function initCanvas() {
       }
 
       ctx.fillStyle = props.coatingTextColor || '#a0a0a0'
-      ctx.font = 'bold 24px Arial'
+      const fontSize = props.coatingTextSize ?? 24
+      const showEnglish = props.showEnglishHint !== false
+      ctx.font = `bold ${fontSize}px Arial`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.shadowColor = 'rgba(0, 0, 0, 0.45)'
       ctx.shadowBlur = 4
-      ctx.fillText('刮开此处', canvas.width / 2, canvas.height / 2 - 15)
-      ctx.font = '14px Arial'
-      ctx.fillText('Scratch Here', canvas.width / 2, canvas.height / 2 + 15)
+      ctx.fillText('刮开此处', canvas.width / 2, canvas.height / 2 - (showEnglish ? 15 : 0))
+      if (showEnglish) {
+        ctx.font = '14px Arial'
+        ctx.fillText('Scratch Here', canvas.width / 2, canvas.height / 2 + 15)
+      }
       ctx.shadowColor = 'transparent'
       ctx.shadowBlur = 0
     })
