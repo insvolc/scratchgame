@@ -29,10 +29,6 @@
               <span class="price-value">{{ lottery.price }}</span>
             </div>
             <p class="lottery-desc">{{ lottery.description }}</p>
-            <div class="lottery-meta">
-              <span class="meta-item">最高奖金: {{ lottery.maxPrize }}</span>
-              <span class="meta-item">中奖概率: {{ lottery.probability }}</span>
-            </div>
           </div>
           <button 
             class="buy-btn" 
@@ -282,21 +278,6 @@ function buyLottery(lotteryId: string) {
   overflow: hidden;
 }
 
-.lottery-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: auto;
-}
-
-.meta-item {
-  font-size: 13px;
-  color: rgba(31, 41, 55, 0.7);
-  background: rgba(31, 41, 55, 0.04);
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-
 .buy-btn {
   width: calc(100% - 44px);
   margin: 0 22px 22px;
@@ -356,6 +337,50 @@ function buyLottery(lotteryId: string) {
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .lottery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .lottery-image {
+    height: 90px;
+    font-size: 40px;
+  }
+
+  .lottery-info {
+    padding: 12px;
+  }
+
+  .lottery-name {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .lottery-price {
+    margin-bottom: 8px;
+  }
+
+  .price-value {
+    font-size: 20px;
+  }
+
+  .lottery-desc {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 8px;
+    -webkit-line-clamp: 1;
+  }
+
+  .buy-btn {
+    width: calc(100% - 24px);
+    margin: 0 12px 12px;
+    padding: 9px;
+    border-radius: 10px;
+    font-size: 14px;
   }
 }
 </style>
