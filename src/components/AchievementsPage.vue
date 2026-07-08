@@ -197,6 +197,46 @@ function formatTime(timestamp: number): string {
   opacity: 0.72;
 }
 
+@media (max-width: 640px) {
+  .achievements-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .achievement-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 14px 10px;
+    gap: 10px;
+  }
+
+  .medal {
+    width: 52px;
+    height: 52px;
+  }
+
+  .medal-icon {
+    font-size: 24px;
+  }
+
+  .achievement-name {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .achievement-desc {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .unlock-time {
+    margin-top: 6px;
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+}
+
 .achievement-card.unlocked {
   background: rgba(255, 255, 255, 0.85);
   border-color: rgba(250, 204, 21, 0.45);
