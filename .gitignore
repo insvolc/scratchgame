@@ -11,3 +11,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android
+android/app/build
+android/build
+android/.gradle
+android/local.properties
+android/captures
+android/*.iml
+android/.idea
+android/app/release
+*.keystore
+*.jks
