@@ -72,10 +72,11 @@ function formatTime(timestamp: number): string {
 <style scoped>
 .achievements-page {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   padding: 80px 24px 24px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -144,6 +145,7 @@ function formatTime(timestamp: number): string {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overflow-y: auto;
 }
 
 .summary-card {

@@ -114,10 +114,11 @@ function clearScratched() {
 <style scoped>
 .backpack-page {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   padding: 80px 24px 24px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -186,6 +187,7 @@ function clearScratched() {
 
 .main-content {
   flex: 1;
+  overflow-y: auto;
 }
 
 .empty-state {

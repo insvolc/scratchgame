@@ -8,23 +8,25 @@
     </header>
     
     <main class="main-content">
-      <div class="logo-section">
-        <h1 class="game-title">幸运刮刮乐</h1>
-        <p class="game-subtitle">试试你的运气，赢取大奖！</p>
-      </div>
-      
-      <div class="stats-section">
-        <div class="stat-item">
-          <span class="stat-value">{{ unscratchedCount }}</span>
-          <span class="stat-label">未刮彩票</span>
+      <div class="top-section">
+        <div class="logo-section">
+          <h1 class="game-title">幸运刮刮乐</h1>
+          <p class="game-subtitle">试试你的运气，赢取大奖！</p>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-value">{{ totalWon }}</span>
-          <span class="stat-label">累计中奖</span>
+
+        <div class="stats-section">
+          <div class="stat-item">
+            <span class="stat-value">{{ unscratchedCount }}</span>
+            <span class="stat-label">未刮彩票</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">{{ totalWon }}</span>
+            <span class="stat-label">累计中奖</span>
+          </div>
         </div>
       </div>
-      
+
       <div class="buttons-section">
         <div class="btn-wrapper">
           <button class="action-btn backpack-btn" @click="goToBackpack">
@@ -47,16 +49,18 @@
           <span v-if="unlockedAchievementCount > 0" class="badge achievement-badge">{{ unlockedAchievementCount }}</span>
         </div>
       </div>
-      
-      <button class="refresh-btn" @click="refreshGame">
-        🔄 重新开始
-      </button>
-      
-      <button class="debug-btn" @click="addCoinsDebug">
-        💸 +100金币 (调试)
-      </button>
-      
-      <p class="disclaimer">模拟游戏，不涉及真实金钱赌博</p>
+
+      <div class="bottom-section">
+        <button class="refresh-btn" @click="refreshGame">
+          🔄 重新开始
+        </button>
+
+        <button class="debug-btn" @click="addCoinsDebug">
+          💸 +100金币 (调试)
+        </button>
+
+        <p class="disclaimer">模拟游戏，不涉及真实金钱赌博</p>
+      </div>
     </main>
   </div>
 </template>
@@ -98,10 +102,11 @@ function addCoinsDebug() {
 <style scoped>
 .home-page {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   padding: 80px 24px 24px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -149,8 +154,18 @@ function addCoinsDebug() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding-bottom: 40px;
+  overflow-y: auto;
+}
+
+.top-section {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: auto;
+  padding-top: 20px;
 }
 
 .logo-section {
@@ -178,8 +193,10 @@ function addCoinsDebug() {
 }
 
 .stats-section {
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.8);
@@ -223,7 +240,7 @@ function addCoinsDebug() {
   flex-direction: column;
   gap: 18px;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
   padding-top: 12px;
 }
 
@@ -331,6 +348,15 @@ function addCoinsDebug() {
   z-index: 2;
 }
 
+.bottom-section {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+}
+
 .refresh-btn {
   margin-top: 32px;
   padding: 12px 28px;
@@ -373,5 +399,129 @@ function addCoinsDebug() {
   color: rgba(31, 41, 55, 0.45);
   text-align: center;
   letter-spacing: 0.5px;
+}
+
+/* 移动端适配 */
+@media (max-width: 480px) {
+  .home-page {
+    padding: 64px 16px 16px;
+  }
+
+  .header {
+    padding: 6px 16px;
+  }
+
+  .coins-display {
+    padding: 6px 14px;
+  }
+
+  .coins-icon {
+    font-size: 18px;
+  }
+
+  .coins-count {
+    font-size: 16px;
+  }
+
+  .main-content {
+    padding-top: 8px;
+    padding-bottom: 24px;
+  }
+
+  .top-section {
+    width: calc(100% - 32px);
+    max-width: 320px;
+    padding-top: 0;
+  }
+
+  .logo-section {
+    margin-bottom: 20px;
+  }
+
+  .game-title {
+    font-size: 34px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .game-subtitle {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .stats-section {
+    padding: 14px 24px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stat-item {
+    padding: 0 14px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .stat-divider {
+    height: 36px;
+  }
+
+  .buttons-section {
+    gap: 18px;
+    width: calc(100% - 32px);
+    max-width: 320px;
+    padding-top: 0;
+  }
+
+  .bottom-section {
+    width: calc(100% - 32px);
+    max-width: 320px;
+  }
+
+  .action-btn {
+    padding: 16px 18px;
+    border-radius: 14px;
+  }
+
+  .btn-icon {
+    font-size: 22px;
+    margin-right: 10px;
+  }
+
+  .btn-text {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .badge {
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .refresh-btn {
+    margin-top: 20px;
+    padding: 10px 22px;
+    font-size: 13px;
+  }
+
+  .debug-btn {
+    margin-top: 10px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .disclaimer {
+    margin-top: 20px;
+    font-size: 11px;
+  }
 }
 </style>

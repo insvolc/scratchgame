@@ -96,10 +96,11 @@ function buyLottery(lotteryId: string) {
 <style scoped>
 .shop-page {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   padding: 80px 24px 24px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -171,6 +172,7 @@ function buyLottery(lotteryId: string) {
 
 .main-content {
   flex: 1;
+  overflow-y: auto;
 }
 
 .lottery-grid {

@@ -672,10 +672,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 <style scoped>
 .scratch-page {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   padding: 80px 24px 24px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -750,6 +751,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
 }
 
 .lottery-container {
