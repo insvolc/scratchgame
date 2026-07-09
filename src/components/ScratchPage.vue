@@ -1808,4 +1808,222 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   color: #888;
   margin-top: 12px;
 }
+
+/* 移动端适配 */
+@media (max-width: 480px) {
+  /* 点石成金 */
+  .dianshi-area {
+    padding: 6px;
+  }
+
+  .dianshi-ticket {
+    padding: 12px 8px 10px;
+    border-radius: 14px;
+  }
+
+  .dianshi-ticket::before {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+
+  .title-main {
+    font-size: 28px;
+    letter-spacing: 4px;
+  }
+
+  .dianshi-rules {
+    font-size: 10px;
+    padding: 0 6px;
+  }
+
+  .prize-banner-value {
+    font-size: 18px;
+  }
+
+  .dianshi-scratch-zone {
+    padding: 6px 4px;
+    gap: 4px;
+  }
+
+  .scratch-zone-label {
+    width: 22px;
+    font-size: 10px;
+    padding: 6px 1px;
+    letter-spacing: 1px;
+  }
+
+  .dianshi-win-row {
+    gap: 4px;
+    padding: 6px 4px;
+  }
+
+  .dianshi-my-grid {
+    gap: 3px;
+    padding: 6px 4px;
+  }
+
+  .dianshi-ball {
+    border-radius: 4px;
+  }
+
+  .ball-value {
+    font-size: 12px;
+  }
+
+  .ball-pinyin {
+    font-size: 6px;
+  }
+
+  .ball-prize {
+    font-size: 7px;
+  }
+
+  .dianshi-footer-banner {
+    font-size: 13px;
+  }
+
+  /* 喜相逢 */
+  .xi-xiangfeng-area {
+    padding: 6px;
+  }
+
+  .xi-xiangfeng-ticket {
+    padding: 14px 8px 10px;
+    border-radius: 14px;
+  }
+
+  .ticket-main-title {
+    font-size: 30px;
+    letter-spacing: 6px;
+  }
+
+  .ticket-subtitle {
+    font-size: 11px;
+    padding: 3px 18px;
+    letter-spacing: 2px;
+  }
+
+  .ticket-prize-banner .prize-value {
+    font-size: 18px;
+  }
+
+  .ticket-body {
+    gap: 4px;
+  }
+
+  .side-banner {
+    font-size: 10px;
+    padding: 6px 1px;
+    letter-spacing: 1px;
+  }
+
+  .xi-xiangfeng-grid {
+    gap: 2px;
+  }
+
+  .xi-xiangfeng-row {
+    gap: 2px;
+  }
+
+  .xi-xiangfeng-cell {
+    border-radius: 5px;
+  }
+
+  .xi-symbol {
+    font-size: 16px;
+  }
+
+  .xi-xiangfeng-cell.winning .xi-symbol {
+    font-size: 18px;
+  }
+
+  .xi-prize {
+    font-size: 9px;
+  }
+
+  .ticket-footer-banner {
+    font-size: 13px;
+    padding: 4px 20px;
+  }
+
+  /* 幸运加倍 */
+  .lucky-double-area {
+    padding: 6px;
+  }
+
+  .lucky-double-ticket {
+    padding: 12px 8px 10px;
+    border-radius: 14px;
+  }
+
+  .lucky-double-title .title-main {
+    font-size: 24px;
+    letter-spacing: 2px;
+  }
+
+  .lucky-double-prize-banner .prize-value {
+    font-size: 14px;
+  }
+
+  .lucky-double-rules {
+    font-size: 9px;
+  }
+
+  .lucky-double-rounds {
+    gap: 3px;
+    padding: 6px;
+  }
+
+  .lucky-double-round {
+    gap: 2px;
+    padding: 3px 4px;
+    border-radius: 5px;
+  }
+
+  .round-label {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .round-symbol {
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+  }
+
+  .round-prize .prize-amount {
+    font-size: 9px;
+  }
+
+  .lucky-double-footer-banner {
+    font-size: 12px;
+  }
+
+  /* 通用 */
+  .lottery-footer {
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .action-btn {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .match-result {
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .match-count {
+    font-size: 13px;
+  }
+
+  .total-prize {
+    font-size: 16px;
+  }
+}
 </style>
