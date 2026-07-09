@@ -21,12 +21,17 @@
         </div>
       </TransitionGroup>
     </div>
+
+    <Transition name="fade">
+      <div v-if="exitConfirmVisible" class="exit-toast">再按一次退出</div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { watch, ref } from 'vue'
+import { watch, ref, onMounted, onUnmounted } from 'vue'
+import { App } from '@capacitor/app'
 import { useGameStore } from '@/stores/game'
 import HomePage from '@/components/HomePage.vue'
 import ShopPage from '@/components/ShopPage.vue'
@@ -54,6 +59,48 @@ watch(
   },
   { immediate: true }
 )
+
+// 安卓返回键二次确认退出
+const exitConfirmVisible = ref(false)
+const exitConfirmTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const EXIT_CONFIRM_DELAY = 2000
+
+let backButtonListener: { remove: () => Promise<void> } | null = null
+
+onMounted(async () => {
+  backButtonListener = await App.addListener('backButton', () => {
+    // 刮奖页面禁止侧滑/返回键返回
+    if (currentView.value === 'scratch') {
+      return
+    }
+
+    if (currentView.value !== 'home') {
+      gameStore.setView('home')
+      return
+    }
+
+    if (exitConfirmVisible.value) {
+      App.exitApp()
+      return
+    }
+
+    exitConfirmVisible.value = true
+    if (exitConfirmTimer.value) {
+      clearTimeout(exitConfirmTimer.value)
+    }
+    exitConfirmTimer.value = setTimeout(() => {
+      exitConfirmVisible.value = false
+      exitConfirmTimer.value = null
+    }, EXIT_CONFIRM_DELAY)
+  })
+})
+
+onUnmounted(() => {
+  if (exitConfirmTimer.value) {
+    clearTimeout(exitConfirmTimer.value)
+  }
+  backButtonListener?.remove()
+})
 </script>
 
 <style scoped>
@@ -128,5 +175,31 @@ watch(
 .toast-leave-to {
   opacity: 0;
   transform: translateY(-16px) scale(0.96);
+}
+
+.exit-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 2000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
