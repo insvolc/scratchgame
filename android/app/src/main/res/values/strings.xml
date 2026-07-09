@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">scratch-game</string>
-    <string name="title_activity_main">scratch-game</string>
+    <string name="app_name">幸运刮刮乐</string>
+    <string name="title_activity_main">幸运刮刮乐</string>
     <string name="package_name">com.example.scratchgame</string>
     <string name="custom_url_scheme">com.example.scratchgame</string>
 </resources>
