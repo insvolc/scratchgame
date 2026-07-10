@@ -16,7 +16,14 @@
 
 ## 快速重新构建 Debug APK
 
-在 PowerShell 中依次执行：
+项目已提供一键构建脚本，直接运行即可：
+
+- **双击运行**：`build-android.bat`
+- **终端运行**：`./build-android.ps1`
+
+脚本会自动完成：设置环境变量 → 构建 Web 产物 → 同步到 Android 工程 → 打包 Debug APK。
+
+如需手动执行，在 PowerShell 中依次运行：
 
 ```powershell
 # 设置环境变量
@@ -69,6 +76,7 @@ cd android
 | `android/` | Android 原生工程 |
 | `package.json` / `package-lock.json` | 新增 `@capacitor/core`、`@capacitor/cli`、`@capacitor/android` 依赖 |
 | `android/gradle/wrapper/gradle-wrapper.properties` | 使用腾讯云镜像下载 Gradle，解决官方源超时问题 |
+| `build-android.ps1` / `build-android.bat` | 一键构建 Debug APK 脚本 |
 | `C:\Users\ROG\.jdks\jdk-21` | 完整版 OpenJDK 21 |
 
 ---
