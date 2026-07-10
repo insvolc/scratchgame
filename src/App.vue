@@ -1,12 +1,14 @@
 <template>
   <div class="app">
-    <HomePage v-if="currentView === 'home'" />
-    <ShopPage v-else-if="currentView === 'shop'" />
-    <BackpackPage v-else-if="currentView === 'backpack'" />
-    <ScratchPage v-else-if="currentView === 'scratch'" />
-    <AchievementsPage v-else-if="currentView === 'achievements'" />
+    <!-- iframe 嵌入模式：直接渲染原始应用内容 -->
+    <template v-if="isEmbedMode">
+      <HomePage v-if="currentView === 'home'" />
+      <ShopPage v-else-if="currentView === 'shop'" />
+      <BackpackPage v-else-if="currentView === 'backpack'" />
+      <ScratchPage v-else-if="currentView === 'scratch'" />
+      <AchievementsPage v-else-if="currentView === 'achievements'" />
 
-    <div class="achievement-toast-container">
+      <div class="achievement-toast-container">
       <TransitionGroup name="toast">
         <div
           v-for="achievement in achievementNotifications"
@@ -22,9 +24,39 @@
       </TransitionGroup>
     </div>
 
-    <Transition name="fade">
-      <div v-if="exitConfirmVisible" class="exit-toast">再按一次退出</div>
-    </Transition>
+      <Transition name="fade">
+        <div v-if="exitConfirmVisible" class="exit-toast">再按一次退出</div>
+      </Transition>
+    </template>
+
+    <!-- 桌面端预览模式：手机模拟器 + iframe -->
+    <MobilePreview v-else>
+      <HomePage v-if="currentView === 'home'" />
+      <ShopPage v-else-if="currentView === 'shop'" />
+      <BackpackPage v-else-if="currentView === 'backpack'" />
+      <ScratchPage v-else-if="currentView === 'scratch'" />
+      <AchievementsPage v-else-if="currentView === 'achievements'" />
+
+      <div class="achievement-toast-container">
+        <TransitionGroup name="toast">
+          <div
+            v-for="achievement in achievementNotifications"
+            :key="achievement.id"
+            class="achievement-toast"
+          >
+            <span class="toast-icon">{{ achievement.icon }}</span>
+            <div class="toast-content">
+              <div class="toast-title">解锁成就</div>
+              <div class="toast-name">{{ achievement.name }}</div>
+            </div>
+          </div>
+        </TransitionGroup>
+      </div>
+
+      <Transition name="fade">
+        <div v-if="exitConfirmVisible" class="exit-toast">再按一次退出</div>
+      </Transition>
+    </MobilePreview>
   </div>
 </template>
 
@@ -38,6 +70,9 @@ import ShopPage from '@/components/ShopPage.vue'
 import BackpackPage from '@/components/BackpackPage.vue'
 import ScratchPage from '@/components/ScratchPage.vue'
 import AchievementsPage from '@/components/AchievementsPage.vue'
+import MobilePreview from '@/components/MobilePreview.vue'
+
+const isEmbedMode = new URLSearchParams(window.location.search).has('embed')
 
 const gameStore = useGameStore()
 const { currentView, achievementNotifications } = storeToRefs(gameStore)
