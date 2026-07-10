@@ -53,6 +53,7 @@ const scratchCanvas = ref<HTMLCanvasElement | null>(null)
 const isScratching = ref(false)
 const scratchPercentage = ref(0)
 const isScratched = ref(false)
+const lastPos = ref<{ x: number; y: number } | null>(null)
 const revealThreshold = computed(() => props.revealThreshold ?? 80)
 
 function getPosition(e: MouseEvent | Touch) {
@@ -72,45 +73,66 @@ function getPosition(e: MouseEvent | Touch) {
 function startScratch(e: MouseEvent) {
   if (isScratched.value) return
   isScratching.value = true
-  scratch(e)
+  lastPos.value = null
+  const pos = getPosition(e)
+  drawScratch(pos)
 }
 
 function scratch(e: MouseEvent) {
   if (!isScratching.value || isScratched.value) return
-  
+  const pos = getPosition(e)
+  drawScratch(pos)
+}
+
+function drawScratch(pos: { x: number; y: number }) {
   const canvas = scratchCanvas.value
   if (!canvas) return
-  
+
   const ctx = canvas.getContext('2d')
   if (!ctx) return
-  
-  const pos = getPosition(e)
+
   const brushSize = props.brushSize || 30
-  
+
   ctx.globalCompositeOperation = 'destination-out'
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = brushSize * 2
+
   ctx.beginPath()
-  ctx.arc(pos.x, pos.y, brushSize, 0, Math.PI * 2)
-  ctx.fill()
-  
+  if (lastPos.value) {
+    ctx.moveTo(lastPos.value.x, lastPos.value.y)
+    ctx.lineTo(pos.x, pos.y)
+  } else {
+    ctx.moveTo(pos.x, pos.y)
+    ctx.lineTo(pos.x, pos.y)
+  }
+  ctx.stroke()
+
+  lastPos.value = pos
+
   calculateScratchPercentage()
 }
 
 function stopScratch() {
   isScratching.value = false
+  lastPos.value = null
 }
 
 function handleTouchStart(e: TouchEvent) {
   if (isScratched.value) return
   isScratching.value = true
+  lastPos.value = null
   const touch = e.touches[0]
-  scratch({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent)
+  const pos = getPosition(touch)
+  drawScratch(pos)
 }
 
 function handleTouchMove(e: TouchEvent) {
   if (!isScratching.value || isScratched.value) return
   e.preventDefault()
   const touch = e.touches[0]
-  scratch({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent)
+  const pos = getPosition(touch)
+  drawScratch(pos)
 }
 
 function calculateScratchPercentage() {
