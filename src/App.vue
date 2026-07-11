@@ -2,7 +2,7 @@
   <div class="app">
     <!-- iframe 嵌入模式：直接渲染原始应用内容 -->
     <template v-if="isEmbedMode">
-      <Transition name="page" mode="out-in">
+      <Transition :name="transitionName" mode="out-in">
         <component :is="currentViewComponent" :key="currentView" />
       </Transition>
 
@@ -29,7 +29,7 @@
 
     <!-- 桌面端预览模式：手机模拟器 + iframe -->
     <MobilePreview v-else>
-      <Transition name="page" mode="out-in">
+      <Transition :name="transitionName" mode="out-in">
         <component :is="currentViewComponent" :key="currentView" />
       </Transition>
 
@@ -71,7 +71,11 @@ import MobilePreview from '@/components/MobilePreview.vue'
 const isEmbedMode = new URLSearchParams(window.location.search).has('embed')
 
 const gameStore = useGameStore()
-const { currentView, achievementNotifications } = storeToRefs(gameStore)
+const { currentView, achievementNotifications, transitionDirection } = storeToRefs(gameStore)
+
+const transitionName = computed(() =>
+  transitionDirection.value === 'backward' ? 'page-back' : 'page-forward'
+)
 
 const viewComponents: Record<string, Component> = {
   home: HomePage,
@@ -152,19 +156,31 @@ onUnmounted(() => {
   position: relative;
 }
 
-.page-enter-active,
-.page-leave-active {
+.page-forward-enter-active,
+.page-forward-leave-active,
+.page-back-enter-active,
+.page-back-leave-active {
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-.page-enter-from {
+.page-forward-enter-from {
   opacity: 0;
   transform: translateX(20px);
 }
 
-.page-leave-to {
+.page-forward-leave-to {
   opacity: 0;
   transform: translateX(-20px);
+}
+
+.page-back-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.page-back-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
 }
 
 .achievement-toast-container {

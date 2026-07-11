@@ -461,16 +461,23 @@ export const useGameStore = defineStore('game', () => {
   const achievements = ref<Achievement[]>(saved.achievements ?? createDefaultAchievements())
   const achievementNotifications = ref<Achievement[]>(saved.achievementNotifications ?? [])
   const peakCoins = ref(saved.peakCoins ?? coins.value)
+  const transitionDirection = ref<'forward' | 'backward'>('forward')
 
-  const unscratchedCount = computed(() => 
+  const unscratchedCount = computed(() =>
     backpack.value.filter(item => !item.isScratched).length
   )
-  
-  const totalWon = computed(() => 
+
+  const totalWon = computed(() =>
     backpack.value.filter(item => item.isScratched && item.prize).reduce((sum, item) => sum + (item.prize || 0), 0)
   )
-  
+
   function setView(view: 'home' | 'shop' | 'backpack' | 'scratch' | 'achievements') {
+    const prevView = currentView.value
+    if (view === 'home' || (prevView === 'scratch' && view === 'backpack')) {
+      transitionDirection.value = 'backward'
+    } else {
+      transitionDirection.value = 'forward'
+    }
     currentView.value = view
     saveState()
   }
@@ -606,6 +613,7 @@ export const useGameStore = defineStore('game', () => {
   
   function selectLottery(item: BackpackItem) {
     currentLottery.value = item
+    transitionDirection.value = 'forward'
     currentView.value = 'scratch'
     saveState()
   }
@@ -762,6 +770,7 @@ export const useGameStore = defineStore('game', () => {
     achievements,
     achievementNotifications,
     peakCoins,
+    transitionDirection,
     unscratchedCount,
     totalWon,
     setView,
