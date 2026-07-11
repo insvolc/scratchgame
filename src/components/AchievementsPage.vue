@@ -153,12 +153,11 @@ function formatTime(timestamp: number): string {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   padding: 20px 32px;
   border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .summary-item {
@@ -183,7 +182,7 @@ function formatTime(timestamp: number): string {
 .summary-divider {
   width: 1px;
   height: 40px;
-  background: linear-gradient(180deg, transparent, rgba(31, 41, 55, 0.15), transparent);
+  background: #e2e8f0;
 }
 
 .achievements-grid {
@@ -198,10 +197,9 @@ function formatTime(timestamp: number): string {
   gap: 16px;
   padding: 18px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(12px);
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   opacity: 0.72;
 }
@@ -247,9 +245,9 @@ function formatTime(timestamp: number): string {
 }
 
 .achievement-card.unlocked {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(250, 204, 21, 0.45);
-  box-shadow: 0 12px 36px rgba(245, 158, 11, 0.15);
+  background: #fff;
+  border-color: #fde68a;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.12);
   opacity: 1;
 }
 
@@ -261,14 +259,12 @@ function formatTime(timestamp: number): string {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  background: #e2e8f0;
   flex-shrink: 0;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .achievement-card.unlocked .medal {
-  background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%);
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  background: #fbbf24;
 }
 
 .medal-icon {
@@ -278,16 +274,7 @@ function formatTime(timestamp: number): string {
 }
 
 .medal-glow {
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, transparent 70%);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.1); opacity: 1; }
+  display: none;
 }
 
 .achievement-info {

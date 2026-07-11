@@ -127,14 +127,11 @@ function addCoinsDebug() {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(250, 204, 21, 0.35);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   padding: 10px 20px;
   border-radius: 999px;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .coins-icon {
@@ -178,11 +175,7 @@ function addCoinsDebug() {
   font-weight: 900;
   letter-spacing: 2px;
   margin-bottom: 12px;
-  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 4px 10px rgba(217, 119, 6, 0.15));
+  color: #1f2937;
 }
 
 .game-subtitle {
@@ -198,14 +191,11 @@ function addCoinsDebug() {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   padding: 24px 44px;
   border-radius: 20px;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   margin-bottom: 36px;
 }
 
@@ -232,7 +222,7 @@ function addCoinsDebug() {
 .stat-divider {
   width: 1px;
   height: 46px;
-  background: linear-gradient(180deg, transparent, rgba(31, 41, 55, 0.15), transparent);
+  background: #e2e8f0;
 }
 
 .buttons-section {
@@ -266,11 +256,7 @@ function addCoinsDebug() {
 }
 
 .action-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
-  opacity: 0.7;
+  content: none;
 }
 
 .action-btn:hover {
@@ -282,37 +268,37 @@ function addCoinsDebug() {
 }
 
 .shop-btn {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: #f59e0b;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.28);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .shop-btn:hover {
-  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
 }
 
 .backpack-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: #6366f1;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .backpack-btn:hover {
-  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
 
 .achievements-btn {
-  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  background: #fbbf24;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.28);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
 }
 
 .achievements-btn:hover {
-  box-shadow: 0 12px 32px rgba(217, 119, 6, 0.4);
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3);
 }
 
 .achievement-badge {
-  background: linear-gradient(135deg, #fbbf24, #d97706);
+  background: #fbbf24;
 }
 
 .btn-icon {
@@ -333,7 +319,7 @@ function addCoinsDebug() {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #ef4444;
   color: #fff;
   border-radius: 50%;
   width: 28px;
@@ -343,8 +329,8 @@ function addCoinsDebug() {
   justify-content: center;
   font-size: 13px;
   font-weight: 800;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+  border: 2px solid #fff;
   z-index: 2;
 }
 

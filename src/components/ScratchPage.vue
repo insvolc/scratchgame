@@ -786,25 +786,18 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 .page-title {
   font-size: 26px;
   font-weight: 900;
-  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 2px 6px rgba(217, 119, 6, 0.15));
+  color: #1f2937;
 }
 
 .coins-display {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(250, 204, 21, 0.35);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   padding: 8px 16px;
   border-radius: 999px;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .coins-icon {
@@ -833,14 +826,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .lottery-frame {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
 }
 
 .game-area {
@@ -1548,24 +1538,20 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .action-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
-  opacity: 0.7;
+  content: none;
 }
 
 .reveal-all-btn {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: #f59e0b;
   color: #fff;
   width: 100%;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.28);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .next-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: #6366f1;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .next-btn.next-btn-disabled {

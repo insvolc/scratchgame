@@ -156,11 +156,7 @@ function clearScratched() {
 .page-title {
   font-size: 26px;
   font-weight: 900;
-  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 2px 6px rgba(217, 119, 6, 0.15));
+  color: #1f2937;
 }
 
 .clear-btn {
@@ -212,7 +208,7 @@ function clearScratched() {
 
 .go-shop-btn {
   padding: 15px 40px;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: #f59e0b;
   border: none;
   border-radius: 999px;
   font-size: 17px;
@@ -220,12 +216,12 @@ function clearScratched() {
   font-weight: 800;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.28);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .go-shop-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
 }
 
 .backpack-grid {
@@ -242,8 +238,8 @@ function clearScratched() {
 }
 
 .lottery-item {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
@@ -251,16 +247,12 @@ function clearScratched() {
   padding: 0;
   text-align: left;
   font-family: inherit;
-  box-shadow:
-    0 8px 28px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .lottery-item:hover:not(.scratched) {
   transform: translateY(-5px);
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .lottery-item:disabled,
@@ -278,39 +270,32 @@ function clearScratched() {
   position: relative;
 }
 
-.lottery-cover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.1) 100%);
-}
-
 .lottery-cover.gold {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  background: #fbbf24;
 }
 
 .lottery-cover.diamond {
-  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  background: #cbd5e1;
 }
 
 .lottery-cover.red {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  background: #f87171;
 }
 
 .lottery-cover.green {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  background: #34d399;
 }
 
 .lottery-cover.rainbow {
-  background: linear-gradient(135deg, #f87171, #fbbf24, #34d399);
+  background: #fbbf24;
 }
 
 .lottery-cover.red-gold {
-  background: linear-gradient(135deg, #f87171, #fbbf24);
+  background: #fb923c;
 }
 
 .lottery-cover.red-lucky {
-  background: linear-gradient(135deg, #fb7185, #fb923c);
+  background: #fb7185;
 }
 
 .lottery-info {

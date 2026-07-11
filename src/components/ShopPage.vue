@@ -138,25 +138,18 @@ function buyLottery(lotteryId: string) {
 .page-title {
   font-size: 26px;
   font-weight: 900;
-  background: linear-gradient(180deg, #1f2937 0%, #d97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 2px 6px rgba(217, 119, 6, 0.15));
+  color: #1f2937;
 }
 
 .coins-display {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(250, 204, 21, 0.35);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   padding: 8px 16px;
   border-radius: 999px;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .coins-icon {
@@ -182,13 +175,11 @@ function buyLottery(lotteryId: string) {
 }
 
 .lottery-card {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: #fff;
+  border: 1px solid #f1f5f9;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transition: transform 0.25s, box-shadow 0.25s;
   display: flex;
   flex-direction: column;
@@ -196,9 +187,7 @@ function buyLottery(lotteryId: string) {
 
 .lottery-card:hover {
   transform: translateY(-6px);
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .lottery-image {
@@ -210,39 +199,32 @@ function buyLottery(lotteryId: string) {
   position: relative;
 }
 
-.lottery-image::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0.12) 100%);
-}
-
 .lottery-card.gold .lottery-image {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  background: #fbbf24;
 }
 
 .lottery-card.diamond .lottery-image {
-  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  background: #cbd5e1;
 }
 
 .lottery-card.red .lottery-image {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  background: #f87171;
 }
 
 .lottery-card.green .lottery-image {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  background: #34d399;
 }
 
 .lottery-card.rainbow .lottery-image {
-  background: linear-gradient(135deg, #f87171, #fbbf24, #34d399);
+  background: #fbbf24;
 }
 
 .lottery-card.red-gold .lottery-image {
-  background: linear-gradient(135deg, #f87171, #fbbf24);
+  background: #fb923c;
 }
 
 .lottery-card.red-lucky .lottery-image {
-  background: linear-gradient(135deg, #fb7185, #fb923c);
+  background: #fb7185;
 }
 
 .lottery-info {
@@ -295,16 +277,16 @@ function buyLottery(lotteryId: string) {
   border-radius: 14px;
   font-size: 17px;
   font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: #f59e0b;
   color: #fff;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.28);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .buy-btn:hover:not(:disabled) {
   transform: scale(1.02);
-  box-shadow: 0 10px 28px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
 }
 
 .buy-btn:disabled {
@@ -324,18 +306,16 @@ function buyLottery(lotteryId: string) {
   color: #fff;
   font-weight: 800;
   font-size: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   animation: fadeInUp 0.3s ease;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .notification.success {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+  background: #f59e0b;
 }
 
 .notification.error {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+  background: #ef4444;
 }
 
 @keyframes fadeInUp {
