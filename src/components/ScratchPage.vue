@@ -99,7 +99,7 @@
                             v-for="(num, index) in currentLottery.myNumbers"
                             :key="'num-' + index"
                             class="dianshi-ball my-ball"
-                            :class="{ winning: selectedMyNumbers.has(index), clickable: num.isWinning }"
+                            :class="{ winning: selectedMyNumbers.has(index), clickable: num.isWinning, 'just-claimed': lastClaimedNumberIndex === index }"
                             @click="handleNumberClick(index)"
                           >
                             <span class="ball-value">{{ num.value }}</span>
@@ -113,7 +113,7 @@
                           v-for="(num, index) in currentLottery.myNumbers"
                           :key="'num-' + index"
                           class="dianshi-ball my-ball"
-                          :class="{ winning: selectedMyNumbers.has(index), clickable: num.isWinning }"
+                          :class="{ winning: selectedMyNumbers.has(index), clickable: num.isWinning, 'just-claimed': lastClaimedNumberIndex === index }"
                           @click="handleNumberClick(index)"
                         >
                           <span class="ball-value">{{ num.value }}</span>
@@ -131,9 +131,14 @@
               </div>
             </div>
 
-            <div class="match-result" v-if="currentLottery.isScratched && (!hasWinningNumbers || hasClickedWinningNumber)">
-              <span class="match-count">匹配 {{ selectedMyNumbers.size }} 个号码</span>
-              <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+            <div class="match-result" v-if="currentLottery.isScratched">
+              <template v-if="hasWinningNumbers && !hasClickedWinningNumber">
+                <span class="match-count match-hint">点击中奖号码领取奖金</span>
+              </template>
+              <template v-else>
+                <span class="match-count">匹配 {{ selectedMyNumbers.size }} / {{ totalWinningNumbers }} 个中奖号码</span>
+                <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+              </template>
             </div>
           </div>
           
@@ -180,7 +185,7 @@
                             v-for="(cell, colIdx) in row"
                             :key="'xicell-' + rowIdx + '-' + colIdx"
                             class="xi-xiangfeng-cell"
-                            :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
+                            :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2, 'just-claimed': lastClaimedXiKey === `${rowIdx}-${colIdx}` }"
                             @click="handleXiCellClick(rowIdx, colIdx)"
                           >
                             <span class="xi-symbol">{{ cell.symbol }}</span>
@@ -199,7 +204,7 @@
                           v-for="(cell, colIdx) in row"
                           :key="'xicell-' + rowIdx + '-' + colIdx"
                           class="xi-xiangfeng-cell"
-                          :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2 }"
+                          :class="{ winning: selectedXiCells.has(`${rowIdx}-${colIdx}`), double: cell.multiplier === 2, 'just-claimed': lastClaimedXiKey === `${rowIdx}-${colIdx}` }"
                           @click="handleXiCellClick(rowIdx, colIdx)"
                         >
                           <span class="xi-symbol">{{ cell.symbol }}</span>
@@ -224,8 +229,13 @@
             </div>
 
             <div class="match-result" v-if="currentLottery.isScratched && currentLottery.xiXiangFengCells">
-              <span class="match-count">已领取 {{ selectedXiCells.size }} 个中奖图符</span>
-              <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+              <template v-if="selectedXiCells.size === 0 && totalWinningXiCells > 0">
+                <span class="match-count match-hint">点击“喜”或“囍”图符领取奖金</span>
+              </template>
+              <template v-else>
+                <span class="match-count">已领取 {{ selectedXiCells.size }} / {{ totalWinningXiCells }} 个中奖图符</span>
+                <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+              </template>
             </div>
           </div>
 
@@ -273,7 +283,7 @@
                       v-for="(round, roundIdx) in currentLottery.luckyDoubleRounds"
                       :key="'ldround-' + roundIdx"
                       class="lucky-double-round"
-                      :class="{ winning: selectedLuckyDoubleRounds.has(roundIdx), double: round.multiplier === 2 }"
+                      :class="{ winning: selectedLuckyDoubleRounds.has(roundIdx), double: round.multiplier === 2, 'just-claimed': lastClaimedLuckyDoubleRound === roundIdx }"
                       @click="handleLuckyDoubleRoundClick(roundIdx)"
                     >
                       <span class="round-label">第{{ round.roundIndex }}局</span>
@@ -299,7 +309,7 @@
                     v-for="(round, roundIdx) in currentLottery.luckyDoubleRounds"
                     :key="'ldround-' + roundIdx"
                     class="lucky-double-round"
-                    :class="{ winning: selectedLuckyDoubleRounds.has(roundIdx), double: round.multiplier === 2 }"
+                    :class="{ winning: selectedLuckyDoubleRounds.has(roundIdx), double: round.multiplier === 2, 'just-claimed': lastClaimedLuckyDoubleRound === roundIdx }"
                     @click="handleLuckyDoubleRoundClick(roundIdx)"
                   >
                     <span class="round-label">第{{ round.roundIndex }}局</span>
@@ -332,8 +342,13 @@
             </div>
 
             <div class="match-result" v-if="currentLottery.isScratched && currentLottery.luckyDoubleRounds">
-              <span class="match-count">已领取 {{ selectedLuckyDoubleRounds.size }} 局中奖金</span>
-              <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+              <template v-if="selectedLuckyDoubleRounds.size === 0 && totalWinningLuckyDoubleRounds > 0">
+                <span class="match-count match-hint">点击中奖局领取奖金</span>
+              </template>
+              <template v-else>
+                <span class="match-count">已领取 {{ selectedLuckyDoubleRounds.size }} / {{ totalWinningLuckyDoubleRounds }} 局中奖</span>
+                <span class="total-prize">已获得 {{ displayPrize }} 金币</span>
+              </template>
             </div>
           </div>
 
@@ -348,14 +363,16 @@
               </button>
             </div>
             <div class="action-section">
-              <button 
-                v-if="hasNextLottery" 
+              <button
+                v-if="hasNextLottery"
                 class="action-btn next-btn"
+                :class="{ 'next-btn-disabled': hasUnclaimedPrize }"
+                :disabled="hasUnclaimedPrize"
                 @click="goToNext"
               >
                 再刮一张
               </button>
-              <button 
+              <button
                 class="action-btn back-btn"
                 @click="goBack"
               >
@@ -394,6 +411,41 @@ const luckyDoubleScratchCanvasRef = ref<InstanceType<typeof ScratchCanvas> | nul
 const revealedAreas = ref<Set<string>>(new Set())
 const hasClickedWinningNumber = ref(false)
 const claimedPrize = ref(0)
+
+const lastClaimedNumberIndex = ref<number | null>(null)
+const lastClaimedXiKey = ref<string | null>(null)
+const lastClaimedLuckyDoubleRound = ref<number | null>(null)
+
+const totalWinningNumbers = computed(() => {
+  if (!currentLottery.value?.myNumbers) return 0
+  return currentLottery.value.myNumbers.filter(n => n.isWinning).length
+})
+
+const totalWinningXiCells = computed(() => {
+  if (!currentLottery.value?.xiXiangFengCells) return 0
+  return currentLottery.value.xiXiangFengCells.flat().filter(c => c.isWinning).length
+})
+
+const totalWinningLuckyDoubleRounds = computed(() => {
+  if (!currentLottery.value?.luckyDoubleRounds) return 0
+  return currentLottery.value.luckyDoubleRounds.filter(r => r.isWinning).length
+})
+
+const hasUnclaimedPrize = computed(() => {
+  const lottery = currentLottery.value
+  if (!lottery || !lottery.isScratched) return false
+
+  if (lottery.myNumbers) {
+    return selectedMyNumbers.value.size < totalWinningNumbers.value
+  }
+  if (lottery.xiXiangFengCells) {
+    return selectedXiCells.value.size < totalWinningXiCells.value
+  }
+  if (lottery.luckyDoubleRounds) {
+    return selectedLuckyDoubleRounds.value.size < totalWinningLuckyDoubleRounds.value
+  }
+  return false
+})
 
 const totalScratchAreas = computed(() => {
   const lottery = currentLottery.value
@@ -477,12 +529,16 @@ function handleNumberClick(index: number) {
   if (!currentLottery.value?.myNumbers) return
   const num = currentLottery.value.myNumbers[index]
   if (!num || !num.isWinning) return
-  
+
   const next = new Set(selectedMyNumbers.value)
   if (!next.has(index)) {
     next.add(index)
     selectedMyNumbers.value = next
-    
+    lastClaimedNumberIndex.value = index
+    setTimeout(() => {
+      lastClaimedNumberIndex.value = null
+    }, 500)
+
     if (num.prize && num.prize > 0) {
       claimedPrize.value += num.prize
       gameStore.addCoins(num.prize)
@@ -492,7 +548,7 @@ function handleNumberClick(index: number) {
       }, 2000)
     }
   }
-  
+
   hasClickedWinningNumber.value = true
 }
 
@@ -506,6 +562,10 @@ function handleXiCellClick(rowIdx: number, colIdx: number) {
   if (!next.has(key)) {
     next.add(key)
     selectedXiCells.value = next
+    lastClaimedXiKey.value = key
+    setTimeout(() => {
+      lastClaimedXiKey.value = null
+    }, 500)
 
     const prize = cell.basePrize * cell.multiplier
     if (prize > 0) {
@@ -532,6 +592,10 @@ function handleLuckyDoubleRoundClick(roundIdx: number) {
   if (!next.has(roundIdx)) {
     next.add(roundIdx)
     selectedLuckyDoubleRounds.value = next
+    lastClaimedLuckyDoubleRound.value = roundIdx
+    setTimeout(() => {
+      lastClaimedLuckyDoubleRound.value = null
+    }, 500)
 
     const prize = round.prize * round.multiplier
     if (prize > 0) {
@@ -677,6 +741,14 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dianshi-ball.clickable,
+.xi-xiangfeng-cell,
+.lucky-double-round,
+.action-btn {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .header {
@@ -1009,6 +1081,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .dianshi-ball {
+  position: relative;
   aspect-ratio: 1.15;
   display: flex;
   flex-direction: column;
@@ -1038,7 +1111,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   box-shadow:
     inset 0 -2px 4px rgba(139, 0, 0, 0.15),
     0 0 12px rgba(255, 140, 0, 0.5);
-  animation: pulse 1s infinite;
+  animation: glow-pulse 1.5s ease-in-out infinite;
 }
 
 .ball-value {
@@ -1049,17 +1122,16 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .ball-pinyin {
-  font-size: 7px;
+  font-size: 9px;
   color: #b8860b;
   font-weight: 600;
   line-height: 1.1;
   margin-top: 1px;
   letter-spacing: 0;
-  transform: scale(0.9);
 }
 
 .ball-prize {
-  font-size: 8px;
+  font-size: 10px;
   color: #c90010;
   font-weight: 700;
   line-height: 1.1;
@@ -1103,6 +1175,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   color: rgba(31, 41, 55, 0.75);
 }
 
+.match-count.match-hint {
+  color: #dc2626;
+  animation: hint-pulse 1.5s ease-in-out infinite;
+}
+
 .total-prize {
   font-size: 20px;
   font-weight: 900;
@@ -1130,7 +1207,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   background: linear-gradient(135deg, #ffd700, #ffb700);
   border-color: #ffd700;
   color: #8B4513;
-  animation: pulse 1s infinite;
+  animation: glow-pulse 1.5s ease-in-out infinite;
 }
 
 .winning-number-display {
@@ -1332,6 +1409,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .xi-xiangfeng-cell {
+  position: relative;
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
@@ -1355,7 +1433,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   background: radial-gradient(circle at 30% 30%, #fff5a0, #ffd700 60%, #ffb700);
   border-color: #b8860b;
   color: #8b0000;
-  animation: pulse 1s infinite;
+  animation: glow-pulse 1.5s ease-in-out infinite;
 }
 
 .xi-xiangfeng-cell.double {
@@ -1381,7 +1459,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .xi-prize {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 2px;
   font-weight: 800;
   color: #333;
@@ -1429,7 +1507,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 .xi-xiangfeng-hint {
   text-align: center;
   font-size: 12px;
-  color: #888;
+  color: #52525b;
   margin-top: 12px;
 }
 
@@ -1490,7 +1568,14 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
 }
 
-.next-btn:hover,
+.next-btn.next-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.next-btn:hover:not(:disabled),
 .reveal-all-btn:hover {
   transform: scale(1.02);
 }
@@ -1524,12 +1609,48 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   animation: confettiFall 2s ease-out forwards;
 }
 
-@keyframes pulse {
+.just-claimed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, transparent 70%);
+  opacity: 0;
+  animation: claim-flash 0.5s ease-out;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@keyframes claim-flash {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hint-pulse {
   0%, 100% {
-    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: scale(1.1);
+    opacity: 0.55;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 -2px 4px rgba(139, 0, 0, 0.15),
+      0 0 12px rgba(255, 140, 0, 0.5);
+  }
+  50% {
+    box-shadow:
+      inset 0 -2px 4px rgba(139, 0, 0, 0.15),
+      0 0 24px rgba(255, 140, 0, 0.9);
   }
 }
 
@@ -1695,6 +1816,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .lucky-double-round {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1715,7 +1837,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   background: radial-gradient(circle at 30% 30%, #fff5a0, #ffd700 60%, #ffb700);
   border-color: #b8860b;
   color: #8b0000;
-  animation: pulse 1s infinite;
+  animation: glow-pulse 1.5s ease-in-out infinite;
 }
 
 .lucky-double-round.double {
@@ -1724,7 +1846,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .round-label {
-  font-size: 9px;
+  font-size: 10px;
   color: #8b0000;
   font-weight: bold;
   white-space: nowrap;
@@ -1773,11 +1895,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 }
 
 .round-prize .prize-currency {
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .round-prize .prize-amount {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .lucky-double-footer-banner {
@@ -1807,7 +1929,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
 .lucky-double-hint {
   text-align: center;
   font-size: 12px;
-  color: #888;
+  color: #52525b;
   margin-top: 12px;
 }
 
@@ -1875,11 +1997,11 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   }
 
   .ball-pinyin {
-    font-size: 6px;
+    font-size: 8px;
   }
 
   .ball-prize {
-    font-size: 7px;
+    font-size: 9px;
   }
 
   .dianshi-footer-banner {
@@ -1942,7 +2064,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   }
 
   .xi-prize {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .ticket-footer-banner {
@@ -1985,7 +2107,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   }
 
   .round-label {
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 0;
   }
 
@@ -1996,7 +2118,7 @@ watch(() => currentLottery.value?.isScratched, (newVal, oldVal) => {
   }
 
   .round-prize .prize-amount {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .lucky-double-footer-banner {

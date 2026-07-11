@@ -2,42 +2,11 @@
   <div class="app">
     <!-- iframe 嵌入模式：直接渲染原始应用内容 -->
     <template v-if="isEmbedMode">
-      <HomePage v-if="currentView === 'home'" />
-      <ShopPage v-else-if="currentView === 'shop'" />
-      <BackpackPage v-else-if="currentView === 'backpack'" />
-      <ScratchPage v-else-if="currentView === 'scratch'" />
-      <AchievementsPage v-else-if="currentView === 'achievements'" />
-
-      <div class="achievement-toast-container">
-      <TransitionGroup name="toast">
-        <div
-          v-for="achievement in achievementNotifications"
-          :key="achievement.id"
-          class="achievement-toast"
-        >
-          <span class="toast-icon">{{ achievement.icon }}</span>
-          <div class="toast-content">
-            <div class="toast-title">解锁成就</div>
-            <div class="toast-name">{{ achievement.name }}</div>
-          </div>
-        </div>
-      </TransitionGroup>
-    </div>
-
-      <Transition name="fade">
-        <div v-if="exitConfirmVisible" class="exit-toast">再按一次退出</div>
+      <Transition name="page" mode="out-in">
+        <component :is="currentViewComponent" :key="currentView" />
       </Transition>
-    </template>
 
-    <!-- 桌面端预览模式：手机模拟器 + iframe -->
-    <MobilePreview v-else>
-      <HomePage v-if="currentView === 'home'" />
-      <ShopPage v-else-if="currentView === 'shop'" />
-      <BackpackPage v-else-if="currentView === 'backpack'" />
-      <ScratchPage v-else-if="currentView === 'scratch'" />
-      <AchievementsPage v-else-if="currentView === 'achievements'" />
-
-      <div class="achievement-toast-container">
+      <div class="achievement-toast-container" :class="{ 'toast-embed': isEmbedMode }">
         <TransitionGroup name="toast">
           <div
             v-for="achievement in achievementNotifications"
@@ -54,7 +23,34 @@
       </div>
 
       <Transition name="fade">
-        <div v-if="exitConfirmVisible" class="exit-toast">再按一次退出</div>
+        <div v-if="exitConfirmVisible" class="exit-toast" :class="{ 'exit-toast-embed': isEmbedMode }">再按一次退出</div>
+      </Transition>
+    </template>
+
+    <!-- 桌面端预览模式：手机模拟器 + iframe -->
+    <MobilePreview v-else>
+      <Transition name="page" mode="out-in">
+        <component :is="currentViewComponent" :key="currentView" />
+      </Transition>
+
+      <div class="achievement-toast-container" :class="{ 'toast-embed': isEmbedMode }">
+        <TransitionGroup name="toast">
+          <div
+            v-for="achievement in achievementNotifications"
+            :key="achievement.id"
+            class="achievement-toast"
+          >
+            <span class="toast-icon">{{ achievement.icon }}</span>
+            <div class="toast-content">
+              <div class="toast-title">解锁成就</div>
+              <div class="toast-name">{{ achievement.name }}</div>
+            </div>
+          </div>
+        </TransitionGroup>
+      </div>
+
+      <Transition name="fade">
+        <div v-if="exitConfirmVisible" class="exit-toast" :class="{ 'exit-toast-embed': isEmbedMode }">再按一次退出</div>
       </Transition>
     </MobilePreview>
   </div>
@@ -62,7 +58,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { watch, ref, onMounted, onUnmounted } from 'vue'
+import { watch, ref, computed, onMounted, onUnmounted, type Component } from 'vue'
 import { App } from '@capacitor/app'
 import { useGameStore } from '@/stores/game'
 import HomePage from '@/components/HomePage.vue'
@@ -76,6 +72,16 @@ const isEmbedMode = new URLSearchParams(window.location.search).has('embed')
 
 const gameStore = useGameStore()
 const { currentView, achievementNotifications } = storeToRefs(gameStore)
+
+const viewComponents: Record<string, Component> = {
+  home: HomePage,
+  shop: ShopPage,
+  backpack: BackpackPage,
+  scratch: ScratchPage,
+  achievements: AchievementsPage
+}
+
+const currentViewComponent = computed(() => viewComponents[currentView.value] || HomePage)
 const dismissTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
 watch(
@@ -146,6 +152,21 @@ onUnmounted(() => {
   position: relative;
 }
 
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
 .achievement-toast-container {
   position: fixed;
   top: 24px;
@@ -158,6 +179,10 @@ onUnmounted(() => {
   pointer-events: none;
   width: calc(100% - 48px);
   max-width: 360px;
+}
+
+.achievement-toast-container.toast-embed {
+  top: 52px;
 }
 
 .achievement-toast {
@@ -226,6 +251,10 @@ onUnmounted(() => {
   z-index: 2000;
   pointer-events: none;
   white-space: nowrap;
+}
+
+.exit-toast.exit-toast-embed {
+  bottom: 92px;
 }
 
 .fade-enter-active,
