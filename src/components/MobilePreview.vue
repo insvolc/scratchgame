@@ -45,6 +45,8 @@
             title="幸运刮刮乐"
           ></iframe>
         </div>
+      </div>
+      <div class="device-overlay">
         <div class="device-home-bar"></div>
       </div>
     </div>
@@ -246,7 +248,7 @@ onUnmounted(() => {
     top: 44px;
     left: 0;
     right: 0;
-    bottom: 20px;
+    bottom: 0;
     overflow: hidden;
   }
 
@@ -255,6 +257,18 @@ onUnmounted(() => {
     height: 100%;
     border: none;
     display: block;
+  }
+
+  .device-overlay {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
+    border-radius: 43px;
   }
 
   .device-home-bar {
@@ -266,7 +280,6 @@ onUnmounted(() => {
     height: 5px;
     background: rgba(0, 0, 0, 0.75);
     border-radius: 100px;
-    z-index: 10;
   }
 
   .device-side-button {
