@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { watch, ref, computed, onMounted, onUnmounted, type Component } from 'vue'
+import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
 import { useGameStore } from '@/stores/game'
 import HomePage from '@/components/HomePage.vue'
@@ -68,7 +69,8 @@ import ScratchPage from '@/components/ScratchPage.vue'
 import AchievementsPage from '@/components/AchievementsPage.vue'
 import MobilePreview from '@/components/MobilePreview.vue'
 
-const isEmbedMode = new URLSearchParams(window.location.search).has('embed')
+const isEmbedMode =
+  new URLSearchParams(window.location.search).has('embed') || Capacitor.isNativePlatform()
 
 const gameStore = useGameStore()
 const { currentView, achievementNotifications, transitionDirection } = storeToRefs(gameStore)
